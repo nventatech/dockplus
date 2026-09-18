@@ -35,7 +35,7 @@ o.bind("SUPER + SHIFT + M", "Restore last minimized window", "omarchy-shell dock
 o.bind("SUPER + ALT + M", "Pick minimized window to restore", "omarchy-shell dock pick")
 ```
 
-`omarchy-shell dock activate <N>` runs the Nth item of the dock on the focused monitor and shows numbers on the icons. Bind it to any free modifier with the number keys (`code:10` to `code:18`).
+`omarchy-shell dock activate <N>` runs the Nth item of the dock on the focused monitor and shows numbers on the icons. The setting "Super + 1-9 opens dock items" binds it to `SUPER + 1..9` in place of the Omarchy workspace switch while it is on; turning it off reloads Hyprland to bring the workspace keys back. Before removing the plugin, turn it off or run `hyprctl reload`.
 
 Other commands: `omarchy-shell dock settings`, `pin <appId>`, `unpin <appId>`, `move <appId|@drives|@trash|@apps> <index>` and `position <bottom|left|right>`.
 
@@ -44,5 +44,5 @@ Other commands: `omarchy-shell dock settings`, `pin <appId>`, `unpin <appId>`, `
 Stored in `~/.config/omarchy-dock/config.json`:
 
 - Appearance: `iconSize` (24 to 96), `backgroundOpacity` (40 to 100), `position` (`bottom`, `left`, `right`), `monitor` (empty for all, or an output name such as `DP-1`), `indicatorStyle` (`default`, `dots`, `dashes`, `segments`), `panelMode`.
-- Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `isolateMonitors`, `isolateWorkspaces`, `showAppsButton`, `showTrash`, `showDrives`.
+- Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `superNumbers`, `isolateMonitors`, `isolateWorkspaces`, `showAppsButton`, `showTrash`, `showDrives`.
 - `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.
