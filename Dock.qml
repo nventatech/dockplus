@@ -82,6 +82,11 @@ Item {
     config.unpin(entry ? entry.id : appId)
   }
 
+  function movePinnedApp(appId, index) {
+    var entry = entryFor(appId)
+    config.movePinned(entry ? entry.id : appId, index)
+  }
+
   function keyOf(toplevel) {
     var appId = appIdOf(toplevel)
     var entry = entryFor(appId)
@@ -222,6 +227,7 @@ Item {
     function settings(): void { root.openSettings() }
     function pin(appId: string): void { root.pinApp(appId) }
     function unpin(appId: string): void { root.unpinApp(appId) }
+    function move(appId: string, index: int): void { root.movePinnedApp(appId, index) }
   }
 
   Connections {

@@ -14,6 +14,8 @@ PanelWindow {
   readonly property int itemPadding: Math.round(iconSize * 0.14)
   readonly property int indicatorSpace: 7
   readonly property int panelPadding: 6
+  readonly property int itemSpacing: 2
+  readonly property int slotSize: iconSize + itemPadding * 2 + itemSpacing
   readonly property int panelHeight: iconSize + itemPadding * 2 + indicatorSpace + panelPadding * 2
   readonly property int edgeGap: 8
   readonly property int overlaySpace: 240
@@ -26,10 +28,11 @@ PanelWindow {
     var workspace = hyprMonitor ? hyprMonitor.activeWorkspace : null
     return workspace ? workspace.toplevels.values.length === 0 : false
   }
-  readonly property bool wantShown: !autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty
+  readonly property bool wantShown: !autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null
   property bool shown: !autohide
 
   property var hoveredItem: null
+  property var dragItem: null
   property real tooltipCenter: 0
   property bool menuOpen: false
   property var menuEntries: []
@@ -163,7 +166,7 @@ PanelWindow {
       Row {
         id: row
         anchors.centerIn: parent
-        spacing: 2
+        spacing: win.itemSpacing
 
         Repeater {
           model: ScriptModel { values: win.dock.appKeys }
@@ -174,14 +177,27 @@ PanelWindow {
             appKey: modelData
           }
         }
+      }
 
+      Rectangle {
+        readonly property var source: win.dragItem
+        readonly property bool active: source !== null && source.dropIndex >= 0 && source.dropIndex !== source.pinnedIndex
+        readonly property int slot: !active ? 0 : source.dropIndex > source.pinnedIndex ? source.dropIndex + 1 : source.dropIndex
+
+        visible: active
+        x: row.x + slot * win.slotSize - Math.round(win.itemSpacing / 2) - 1
+        y: row.y + win.itemPadding
+        width: 2
+        height: win.iconSize
+        radius: 1
+        color: Color.accent
       }
     }
 
     Rectangle {
       id: tooltip
 
-      readonly property bool active: win.hoveredItem !== null && !win.menuOpen && !win.previewOpen && win.shown
+      readonly property bool active: win.hoveredItem !== null && !win.menuOpen && !win.previewOpen && win.shown && win.dragItem === null
 
       visible: opacity > 0
       opacity: active ? 1 : 0

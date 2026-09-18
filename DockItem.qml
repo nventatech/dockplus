@@ -9,6 +9,12 @@ Item {
   property var host
   property string appKey: ""
 
+  property int dropIndex: -1
+  property bool wasDragged: false
+
+  readonly property bool pinned: dock.config.isPinned(appKey)
+  readonly property int pinnedIndex: dock.config.pinned.indexOf(appKey)
+  readonly property bool dragging: mouse.drag.active
   readonly property var entry: dock.entryFor(appKey)
   readonly property var windows: dock.windowsOf(appKey)
   readonly property var openWindows: windows.filter(function(window) { return !item.dock.isMinimized(window) })
@@ -51,48 +57,78 @@ Item {
     return entries
   }
 
+  function updateDrop() {
+    var center = pinnedIndex * host.slotSize + width / 2 + body.x
+    dropIndex = Math.max(0, Math.min(dock.config.pinned.length - 1, Math.floor(center / host.slotSize)))
+  }
+
+  onDraggingChanged: {
+    if (dragging) {
+      wasDragged = true
+      host.dragItem = item
+      updateDrop()
+      return
+    }
+    var config = dock.config
+    var key = appKey
+    var target = dropIndex
+    body.x = 0
+    dropIndex = -1
+    host.dragItem = null
+    if (target >= 0) config.movePinned(key, target)
+  }
+
   width: host.iconSize + host.itemPadding * 2
   height: host.iconSize + host.itemPadding * 2 + host.indicatorSpace
+  z: dragging ? 10 : 0
 
-  Rectangle {
-    anchors.fill: parent
-    radius: Style.cornerRadius
-    color: Util.alpha(Color.bar.text, mouse.pressed ? 0.16 : mouse.containsMouse ? 0.09 : 0)
-    Behavior on color { ColorAnimation { duration: 100 } }
-  }
+  Item {
+    id: body
+    width: parent.width
+    height: parent.height
+    scale: item.dragging ? 1.06 : 1
+    onXChanged: if (item.dragging) item.updateDrop()
 
-  Image {
-    x: item.host.itemPadding
-    y: item.host.itemPadding
-    width: item.host.iconSize
-    height: item.host.iconSize
-    sourceSize: Qt.size(item.host.iconSize, item.host.iconSize)
-    source: item.dock.iconFor(item.appId, item.entry)
-    asynchronous: true
-    smooth: true
-    opacity: item.allMinimized ? 0.5 : 1
-    scale: mouse.pressed ? 0.9 : mouse.containsMouse ? 1.1 : 1
-    Behavior on opacity { NumberAnimation { duration: 140 } }
-    Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
-  }
+    Rectangle {
+      anchors.fill: parent
+      radius: Style.cornerRadius
+      color: Util.alpha(Color.bar.text, mouse.pressed ? 0.16 : mouse.containsMouse ? 0.09 : 0)
+      Behavior on color { ColorAnimation { duration: 100 } }
+    }
 
-  Row {
-    anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 1
-    height: 4
-    spacing: 3
+    Image {
+      x: item.host.itemPadding
+      y: item.host.itemPadding
+      width: item.host.iconSize
+      height: item.host.iconSize
+      sourceSize: Qt.size(item.host.iconSize, item.host.iconSize)
+      source: item.dock.iconFor(item.appId, item.entry)
+      asynchronous: true
+      smooth: true
+      opacity: item.allMinimized ? 0.5 : 1
+      scale: mouse.pressed ? 0.9 : mouse.containsMouse ? 1.1 : 1
+      Behavior on opacity { NumberAnimation { duration: 140 } }
+      Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+    }
 
-    Repeater {
-      model: item.indicators
-      Rectangle {
-        required property string modelData
-        anchors.verticalCenter: parent.verticalCenter
-        width: modelData === "focused" ? Math.round(item.host.iconSize * 0.34) : modelData === "minimized" ? 7 : 4
-        height: modelData === "minimized" ? 2 : 4
-        radius: height / 2
-        color: modelData === "focused" ? Color.accent
-          : Util.alpha(Color.bar.text, modelData === "minimized" ? 0.45 : 0.7)
+    Row {
+      anchors.horizontalCenter: parent.horizontalCenter
+      anchors.bottom: parent.bottom
+      anchors.bottomMargin: 1
+      height: 4
+      spacing: 3
+
+      Repeater {
+        model: item.indicators
+        Rectangle {
+          required property string modelData
+          anchors.verticalCenter: parent.verticalCenter
+          width: modelData === "focused" ? Math.round(item.host.iconSize * 0.34) : modelData === "minimized" ? 7 : 4
+          height: modelData === "minimized" ? 2 : 4
+          radius: height / 2
+          color: modelData === "focused" ? Color.accent
+            : Util.alpha(Color.bar.text, modelData === "minimized" ? 0.45 : 0.7)
+        }
       }
     }
   }
@@ -102,8 +138,14 @@ Item {
     anchors.fill: parent
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+    drag.target: item.pinned ? body : null
+    drag.axis: Drag.XAxis
+    drag.minimumX: -item.pinnedIndex * item.host.slotSize
+    drag.maximumX: (item.dock.config.pinned.length - 1 - item.pinnedIndex) * item.host.slotSize
+    onPressed: item.wasDragged = false
     onContainsMouseChanged: item.host.setHovered(item, containsMouse)
     onClicked: function(event) {
+      if (item.wasDragged) return
       if (event.button === Qt.RightButton) item.host.openMenu(item, item.menuEntries())
       else if (event.button === Qt.MiddleButton) { if (item.entry) item.dock.launch(item.appKey) }
       else if (item.windows.length > 1) item.host.togglePreview(item)

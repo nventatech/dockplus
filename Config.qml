@@ -36,6 +36,17 @@ Item {
     adapter.pinned = pinned.filter(function(entry) { return entry !== key })
   }
 
+  function movePinned(key, toIndex) {
+    var from = pinned.indexOf(key)
+    if (from === -1) return
+    var target = Math.max(0, Math.min(pinned.length - 1, Math.round(toIndex)))
+    if (target === from) return
+    var next = pinned.slice()
+    next.splice(from, 1)
+    next.splice(target, 0, key)
+    adapter.pinned = next
+  }
+
   FileView {
     id: file
     path: root.configPath
