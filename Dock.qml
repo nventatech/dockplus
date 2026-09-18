@@ -250,6 +250,16 @@ Item {
     else focusWindow(toplevel)
   }
 
+  function fullscreenOn(monitorName) {
+    var monitors = Hyprland.monitors.values
+    for (var i = 0; i < monitors.length; i++) {
+      if (monitors[i].name !== monitorName) continue
+      var workspace = monitors[i].activeWorkspace
+      return workspace ? workspace.hasFullscreen === true : false
+    }
+    return false
+  }
+
   function focusedScreen() {
     var focused = Hyprland.focusedMonitor
     var screens = Quickshell.screens

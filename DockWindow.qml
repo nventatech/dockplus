@@ -33,7 +33,9 @@ PanelWindow {
     var workspace = hyprMonitor ? hyprMonitor.activeWorkspace : null
     return workspace ? workspace.toplevels.values.length === 0 : false
   }
-  readonly property bool wantShown: !autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null
+  readonly property bool fullscreenActive: hyprMonitor ? dock.fullscreenOn(hyprMonitor.name) : false
+  readonly property bool wantShown: !fullscreenActive
+    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null)
   property bool shown: !autohide
 
   property var hoveredItem: null
@@ -49,6 +51,7 @@ PanelWindow {
 
   readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
   readonly property rect inputRect: {
+    if (fullscreenActive) return Qt.rect(0, 0, 0, 0)
     if (shown) {
       if (position === "left") return Qt.rect(0, panel.y, edgeSpace, panel.height)
       if (position === "right") return Qt.rect(width - edgeSpace, panel.y, edgeSpace, panel.height)
@@ -147,7 +150,14 @@ PanelWindow {
       hideTimer.restart()
     }
   }
-  onAutohideChanged: shown = !autohide || wantShown
+  onAutohideChanged: shown = wantShown
+  onFullscreenActiveChanged: {
+    if (!fullscreenActive) return
+    showTimer.stop()
+    menuOpen = false
+    previewKey = ""
+    shown = false
+  }
 
   screen: modelData.screen
   color: "transparent"
@@ -187,7 +197,7 @@ PanelWindow {
   }
 
   Timer { id: showTimer; interval: 120; onTriggered: win.shown = true }
-  Timer { id: hideTimer; interval: 450; onTriggered: win.shown = !win.autohide || win.wantShown }
+  Timer { id: hideTimer; interval: 450; onTriggered: win.shown = win.wantShown }
 
   HyprlandFocusGrab {
     windows: [win]
