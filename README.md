@@ -10,16 +10,19 @@ omarchy plugin add <repo-url> --enable
 
 ## Use
 
-- Click: launch the app, focus its window, or minimize it when it is already focused. With two or more windows, a panel with live previews opens so you can pick one.
+- Click: by default, launch the app, focus its window, or minimize it when it is already focused. With two or more windows, a panel with live previews opens. Settings can switch this to cycling windows or always opening a new window.
 - Middle click: open a new window.
-- Right click: pin, unpin, minimize, close, or open the dock settings.
+- Scroll on an icon: cycle through the app's open windows.
+- Right click: the app's own actions (such as Steam Library or a Brave incognito window), then pin, unpin, minimize, close or dock settings.
 - Drag any icon along the dock to reorder it: apps, drives, trash and the applications button. Dragging a running app that is not pinned pins it where you drop it.
+- Drop files on an app to open them with it, on a drive to copy them there, or on the trash to delete them.
+- An icon bounces while its app is starting and wiggles when a window asks for attention.
 - Applications button: opens the Omarchy apps menu.
 - Trash: shows the item count; click opens it, right click empties it after a second confirming click.
 - Removable drives: USB sticks and external disks appear while plugged in. Click mounts and opens; right click unmounts or safely removes the disk.
-- Minimized windows stay on their app icon, dimmed and with a dash indicator. Click to restore to the current workspace.
+- Minimized windows stay on their app icon, dimmed. Click to restore to the current workspace. A minimized window that gets focus from elsewhere (a notification, an app activating itself) is restored the same way.
 - The minimize button of X11 apps (Steam, Wine apps) works: a small `python3` helper listens for the request on XWayland.
-- With autohide on, touch the screen edge where the dock sits to reveal it. It also stays visible on an empty workspace. On an edge shared with another monitor the pointer crosses over instead of stopping, so prefer an outer edge.
+- With autohide on, touch the screen edge where the dock sits to reveal it. It also shows on an empty workspace and never shows over a fullscreen window. On an edge shared with another monitor the pointer crosses over instead of stopping, so prefer an outer edge.
 - The picker (`omarchy-shell dock pick`) shows every minimized window as a live card. Arrows or Tab move, Enter restores, Delete closes the window, Esc leaves.
 
 ## Keybindings
@@ -32,8 +35,14 @@ o.bind("SUPER + SHIFT + M", "Restore last minimized window", "omarchy-shell dock
 o.bind("SUPER + ALT + M", "Pick minimized window to restore", "omarchy-shell dock pick")
 ```
 
+`omarchy-shell dock activate <N>` runs the Nth item of the dock on the focused monitor and shows numbers on the icons. Bind it to any free modifier with the number keys (`code:10` to `code:18`).
+
 Other commands: `omarchy-shell dock settings`, `pin <appId>`, `unpin <appId>`, `move <appId|@drives|@trash|@apps> <index>` and `position <bottom|left|right>`.
 
 ## Settings
 
-Stored in `~/.config/omarchy-dock/config.json`: `autohide`, `iconSize` (24 to 96), `position` (`bottom`, `left` or `right`), `monitor` (empty for all, or an output name such as `DP-1`), `showDrives`, `showTrash`, `showAppsButton` and `pinned` (dock order: desktop entry ids plus `@drives`, `@trash` and `@apps`).
+Stored in `~/.config/omarchy-dock/config.json`:
+
+- Appearance: `iconSize` (24 to 96), `backgroundOpacity` (40 to 100), `position` (`bottom`, `left`, `right`), `monitor` (empty for all, or an output name such as `DP-1`), `indicatorStyle` (`default`, `dots`, `dashes`, `segments`), `panelMode`.
+- Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `isolateMonitors`, `isolateWorkspaces`, `showAppsButton`, `showTrash`, `showDrives`.
+- `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.
