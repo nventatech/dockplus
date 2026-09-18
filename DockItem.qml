@@ -14,7 +14,9 @@ DockSlot {
   readonly property bool focused: openWindows.some(function(window) { return window.activated })
   readonly property bool allMinimized: windows.length > 0 && openWindows.length === 0
   readonly property bool launching: dock.isLaunching(appKey)
+  readonly property bool urgent: dock.isUrgent(appKey)
   property real bounce: 0
+  property real wiggle: 0
   readonly property string appId: windows.length > 0 ? dock.appIdOf(windows[0]) : appKey
   readonly property var indicators: {
     var states = []
@@ -76,6 +78,7 @@ DockSlot {
     asynchronous: true
     smooth: true
     opacity: item.allMinimized ? 0.5 : 1
+    rotation: item.wiggle
     scale: item.pressed ? 0.9 : item.hovered ? 1.1 : 1
     Behavior on opacity { NumberAnimation { duration: 140 } }
     Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
@@ -93,6 +96,18 @@ DockSlot {
     NumberAnimation { target: item; property: "bounce"; to: item.host.iconSize * 0.25; duration: 260; easing.type: Easing.OutQuad }
     NumberAnimation { target: item; property: "bounce"; to: 0; duration: 260; easing.type: Easing.InQuad }
     PauseAnimation { duration: 180 }
+  }
+
+  SequentialAnimation {
+    running: item.urgent
+    loops: Animation.Infinite
+    onRunningChanged: if (!running) item.wiggle = 0
+    NumberAnimation { target: item; property: "wiggle"; to: -12; duration: 70 }
+    NumberAnimation { target: item; property: "wiggle"; to: 12; duration: 120 }
+    NumberAnimation { target: item; property: "wiggle"; to: -8; duration: 110 }
+    NumberAnimation { target: item; property: "wiggle"; to: 8; duration: 100 }
+    NumberAnimation { target: item; property: "wiggle"; to: 0; duration: 80 }
+    PauseAnimation { duration: 1400 }
   }
 
   Grid {

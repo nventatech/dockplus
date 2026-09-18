@@ -35,8 +35,9 @@ PanelWindow {
   }
   readonly property bool fullscreenActive: hyprMonitor ? dock.fullscreenOn(hyprMonitor.name) : false
   readonly property bool wantShown: !fullscreenActive
-    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null)
+    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null || urgentReveal)
   property bool shown: !autohide
+  property bool urgentReveal: false
 
   property var hoveredItem: null
   property var dragItem: null
@@ -196,6 +197,16 @@ PanelWindow {
     }
   }
 
+  Connections {
+    target: win.dock
+    function onUrgentSerialChanged() {
+      if (win.fullscreenActive) return
+      win.urgentReveal = true
+      urgentTimer.restart()
+    }
+  }
+
+  Timer { id: urgentTimer; interval: 3000; onTriggered: win.urgentReveal = false }
   Timer { id: showTimer; interval: 120; onTriggered: win.shown = true }
   Timer { id: hideTimer; interval: 450; onTriggered: win.shown = win.wantShown }
 

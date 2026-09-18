@@ -21,6 +21,8 @@ Item {
   readonly property int maxActions: 10
   readonly property int launchTimeout: 10000
   property var launching: ({})
+  property int urgentSerial: 0
+  property var restoring: ({})
 
   property var clients: ({})
   readonly property var toplevels: Hyprland.toplevels.values.filter(function(toplevel) {
@@ -221,14 +223,33 @@ Item {
       + '", workspace = "' + minimizedWorkspace + '", follow = false })')
   }
 
+  function targetWorkspaceId() {
+    var monitor = Hyprland.focusedMonitor
+    var workspace = monitor && monitor.activeWorkspace ? monitor.activeWorkspace : Hyprland.focusedWorkspace
+    return workspace && workspace.id > 0 ? workspace.id : 1
+  }
+
   function restoreWindow(toplevel) {
     if (!toplevel) return
     forgetMinimized(toplevel)
-    var workspace = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+    var next = Object.assign({}, restoring)
+    next[toplevel.address] = Date.now() + 1500
+    restoring = next
     var target = 'window = "address:' + address(toplevel) + '"'
-    Quickshell.execDetached(["sh", "-c", 'hyprctl dispatch "$1" && hyprctl dispatch "$2"', "sh",
-      'hl.dsp.window.move({ ' + target + ', workspace = "' + workspace + '" })',
-      'hl.dsp.focus({ ' + target + ' })'])
+    Quickshell.execDetached(["sh", "-c",
+      'hyprctl dispatch "$1" && hyprctl dispatch "$2"\n'
+      + 'hyprctl -j monitors | grep -q "\\"special:minimized\\"" && hyprctl dispatch "$3"',
+      "sh",
+      'hl.dsp.window.move({ ' + target + ', workspace = "' + targetWorkspaceId() + '" })',
+      'hl.dsp.focus({ ' + target + ' })',
+      'hl.dsp.workspace.toggle_special("minimized")'])
+  }
+
+  function onWindowFocused(addressHex) {
+    var until = restoring[addressHex]
+    if (until && Date.now() < until) return
+    for (var i = 0; i < toplevels.length; i++)
+      if (toplevels[i].address === addressHex && isMinimized(toplevels[i])) restoreWindow(toplevels[i])
   }
 
   function x11Toplevel(pid, title) {
@@ -264,6 +285,10 @@ Item {
     var next = Object.assign({}, launching)
     next[key] = { count: windowsOf(key).length, until: Date.now() + launchTimeout }
     launching = next
+  }
+
+  function isUrgent(key) {
+    return windowsOf(key).some(function(toplevel) { return toplevel.urgent && !toplevel.activated })
   }
 
   function isLaunching(key) {
@@ -366,6 +391,10 @@ Item {
     function onRawEvent(event) {
       if (event.name === "movewindowv2" || event.name === "openwindow" || event.name === "closewindow") {
         root.refreshClients()
+      } else if (event.name === "urgent") {
+        root.urgentSerial++
+      } else if (event.name === "activewindowv2") {
+        root.onWindowFocused(String(event.data))
       } else if (event.name === "minimized") {
         var parts = String(event.data).split(",")
         if (parts[1] !== "1") return
