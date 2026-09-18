@@ -310,6 +310,20 @@ Item {
     Quickshell.execDetached(["uwsm-app", "--", "gtk-launch", key + ".desktop"])
   }
 
+  function newWindow(key) {
+    var entry = entryFor(key)
+    if (!entry) return
+    var command = entry.command
+    for (var i = 0; i < entry.actions.length; i++)
+      if (entry.actions[i].id === "new-window" && entry.actions[i].command.length > 0) command = entry.actions[i].command
+    if (entry.runInTerminal || !command || command.length === 0) {
+      launch(key)
+      return
+    }
+    markLaunching(key)
+    Quickshell.execDetached(["uwsm-app", "--"].concat(command))
+  }
+
   function markLaunching(key) {
     var next = Object.assign({}, launching)
     next[key] = { count: windowsOf(key).length, until: Date.now() + launchTimeout }

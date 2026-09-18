@@ -32,7 +32,7 @@ DockSlot {
     var open = openWindows.slice()
     var minimized = minimizedWindows.slice()
     var all = windows.slice()
-    if (entry) entries.push({ label: dock.tr("newWindow"), run: function() { item.dock.launch(item.appKey) } })
+    if (entry) entries.push({ label: dock.tr("newWindow"), run: function() { item.dock.newWindow(item.appKey) } })
     var actions = dock.actionsFor(appKey)
     actions.forEach(function(action) {
       entries.push({ label: action.name, run: function() { item.dock.runAction(action) } })
@@ -59,7 +59,7 @@ DockSlot {
 
   function leftClick() {
     var mode = dock.config.clickAction
-    if (mode === "launch" && entry) dock.launch(appKey)
+    if (mode === "launch" && entry) dock.newWindow(appKey)
     else if (mode === "cycle") dock.cycleClick(appKey, host.scope)
     else if (windows.length > 1) host.togglePreview(item)
     else dock.activateApp(appKey, host.scope)
@@ -71,7 +71,7 @@ DockSlot {
 
   onClicked: function(button) {
     if (button === Qt.RightButton) host.openMenu(item, menuEntries())
-    else if (button === Qt.MiddleButton) { if (entry) dock.launch(appKey) }
+    else if (button === Qt.MiddleButton) { if (entry) dock.newWindow(appKey) }
     else leftClick()
   }
 
