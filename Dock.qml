@@ -472,7 +472,7 @@ Item {
   }
 
   IpcHandler {
-    target: "dock"
+    target: "dockplus"
     function minimize(): void { root.minimizeActive() }
     function restore(): void { root.restoreLast() }
     function pick(): void { root.togglePicker() }

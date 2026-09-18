@@ -6,7 +6,7 @@ Item {
   id: root
 
   readonly property string configHome: Quickshell.env("XDG_CONFIG_HOME") || (Quickshell.env("HOME") + "/.config")
-  readonly property string configDir: configHome + "/omarchy-dock"
+  readonly property string configDir: configHome + "/dockplus"
   readonly property string configPath: configDir + "/config.json"
 
   readonly property int minIconSize: 24

@@ -63,7 +63,7 @@ PanelWindow {
   color: "transparent"
   anchors { top: true; bottom: true; left: true; right: true }
   exclusionMode: ExclusionMode.Ignore
-  WlrLayershell.namespace: "omarchy-dock-settings"
+  WlrLayershell.namespace: "dockplus-settings"
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.keyboardFocus: opened ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 

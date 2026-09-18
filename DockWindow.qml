@@ -238,7 +238,7 @@ PanelWindow {
   implicitHeight: overlaySpace + edgeSpace
   exclusionMode: autohide ? ExclusionMode.Ignore : ExclusionMode.Normal
   exclusiveZone: autohide ? 0 : edgeSpace
-  WlrLayershell.namespace: "omarchy-dock"
+  WlrLayershell.namespace: "dockplus"
   WlrLayershell.layer: WlrLayer.Top
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 

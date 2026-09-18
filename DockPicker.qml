@@ -54,7 +54,7 @@ PanelWindow {
   color: "transparent"
   anchors { top: true; bottom: true; left: true; right: true }
   exclusionMode: ExclusionMode.Ignore
-  WlrLayershell.namespace: "omarchy-dock-picker"
+  WlrLayershell.namespace: "dockplus-picker"
   WlrLayershell.layer: WlrLayer.Overlay
   WlrLayershell.keyboardFocus: opened ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 

@@ -65,33 +65,33 @@ Item {
       Quickshell.execDetached(["gio", "open", drive.mountpoint])
       return
     }
-    run('out=$(udisksctl mount -b "$1" 2>&1) || { notify-send "Dock" "$out"; exit 1; }\n'
+    run('out=$(udisksctl mount -b "$1" 2>&1) || { notify-send "DockPlus" "$out"; exit 1; }\n'
       + 'path=$(printf "%s\\n" "$out" | sed -n "s/^Mounted .* at \\(.*\\)$/\\1/p")\n'
       + 'path=${path%.}\n'
       + '[ -n "$path" ] && gio open "$path"', [drive.device])
   }
 
   function unmount(drive) {
-    run('out=$(udisksctl unmount -b "$1" 2>&1) || notify-send "Dock" "$out"', [drive.device])
+    run('out=$(udisksctl unmount -b "$1" 2>&1) || notify-send "DockPlus" "$out"', [drive.device])
   }
 
   function eject(drive) {
     var mounted = drives.filter(function(other) { return other.disk === drive.disk && other.mounted })
       .map(function(other) { return other.device })
     run('disk=$1; shift\n'
-      + 'for device in "$@"; do out=$(udisksctl unmount -b "$device" 2>&1) || { notify-send "Dock" "$out"; exit 1; }; done\n'
-      + 'out=$(udisksctl power-off -b "$disk" 2>&1) || notify-send "Dock" "$out"', [drive.disk].concat(mounted))
+      + 'for device in "$@"; do out=$(udisksctl unmount -b "$device" 2>&1) || { notify-send "DockPlus" "$out"; exit 1; }; done\n'
+      + 'out=$(udisksctl power-off -b "$disk" 2>&1) || notify-send "DockPlus" "$out"', [drive.disk].concat(mounted))
   }
 
   function copyTo(drive, paths) {
     if (paths.length === 0) return
     run('dest=$1; dev=$2; shift 2\n'
       + 'if [ -z "$dest" ]; then\n'
-      + '  out=$(udisksctl mount -b "$dev" 2>&1) || { notify-send "Dock" "$out"; exit 1; }\n'
+      + '  out=$(udisksctl mount -b "$dev" 2>&1) || { notify-send "DockPlus" "$out"; exit 1; }\n'
       + '  dest=$(printf "%s\\n" "$out" | sed -n "s/^Mounted .* at \\(.*\\)$/\\1/p"); dest=${dest%.}\n'
       + 'fi\n'
-      + 'notify-send "Dock" "Copying $# item(s) to $dest"\n'
-      + 'if cp -r -n -- "$@" "$dest/"; then notify-send "Dock" "Copy to $dest finished"; else notify-send "Dock" "Copy to $dest failed"; fi',
+      + 'notify-send "DockPlus" "Copying $# item(s) to $dest"\n'
+      + 'if cp -r -n -- "$@" "$dest/"; then notify-send "DockPlus" "Copy to $dest finished"; else notify-send "DockPlus" "Copy to $dest failed"; fi',
       [drive.mountpoint, drive.device].concat(paths))
   }
 
