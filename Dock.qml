@@ -198,6 +198,16 @@ Item {
     else focusWindow(toplevel)
   }
 
+  function focusedScreen() {
+    var focused = Hyprland.focusedMonitor
+    var screens = Quickshell.screens
+    for (var i = 0; i < screens.length; i++)
+      if (focused && screens[i].name === focused.name) return screens[i]
+    return screens.length > 0 ? screens[0] : null
+  }
+
+  function togglePicker() { picker.toggle() }
+
   function screenEnabled(screen) {
     return config.monitor === "" || config.monitor === screen.name
   }
@@ -208,6 +218,7 @@ Item {
     target: "dock"
     function minimize(): void { root.minimizeActive() }
     function restore(): void { root.restoreLast() }
+    function pick(): void { root.togglePicker() }
     function settings(): void { root.openSettings() }
     function pin(appId: string): void { root.pinApp(appId) }
     function unpin(appId: string): void { root.unpinApp(appId) }
@@ -270,6 +281,11 @@ Item {
 
   DockSettings {
     id: settings
+    dock: root
+  }
+
+  DockPicker {
+    id: picker
     dock: root
   }
 }

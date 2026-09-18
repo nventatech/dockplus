@@ -214,7 +214,6 @@ PanelWindow {
 
       readonly property int count: win.previewWindows.length
       readonly property int cardWidth: Math.max(120, Math.min(240, Math.floor((content.width - 32) / Math.max(1, count)) - 8))
-      readonly property int thumbHeight: Math.round(cardWidth * 0.6)
 
       visible: win.previewOpen
       x: Math.max(4, Math.min(content.width - width - 4, Math.round(win.previewCenter - width / 2)))
@@ -234,123 +233,18 @@ PanelWindow {
         Repeater {
           model: ScriptModel { values: win.previewWindows }
 
-          Rectangle {
-            id: card
+          WindowCard {
             required property var modelData
-            readonly property bool minimized: win.dock.isMinimized(modelData)
-
-            width: preview.cardWidth
-            height: preview.thumbHeight + cardTitle.implicitHeight + 18
-            radius: Style.cornerRadius
-            color: cardMouse.containsMouse ? Util.alpha(Color.popups.text, 0.1) : "transparent"
-            border.width: card.modelData.activated ? 1 : 0
-            border.color: Color.accent
-
-            Item {
-              id: thumbBox
-              x: 6
-              y: 6
-              width: parent.width - 12
-              height: preview.thumbHeight
-
-              ScreencopyView {
-                id: thumb
-                anchors.centerIn: parent
-                opacity: card.minimized ? 0.45 : 1
-                captureSource: card.modelData.wayland
-                live: true
-                constraintSize: Qt.size(thumbBox.width, thumbBox.height)
-              }
-
-              Image {
-                anchors.centerIn: parent
-                visible: !thumb.hasContent
-                width: 48
-                height: 48
-                sourceSize: Qt.size(48, 48)
-                source: win.dock.iconFor(win.dock.appIdOf(card.modelData), win.dock.entryFor(win.dock.appIdOf(card.modelData)))
-              }
+            dock: win.dock
+            toplevel: modelData
+            cardWidth: preview.cardWidth
+            onPicked: {
+              var host = win
+              var target = toplevel
+              host.dock.activateWindow(target)
+              host.previewKey = ""
             }
-
-            Rectangle {
-              visible: card.minimized
-              x: 10
-              y: 10
-              width: badge.implicitWidth + 10
-              height: badge.implicitHeight + 4
-              radius: Style.cornerRadius
-              color: Color.popups.background
-              border.width: 1
-              border.color: Util.alpha(Color.popups.text, 0.4)
-
-              Text {
-                id: badge
-                anchors.centerIn: parent
-                text: win.dock.tr("minimized")
-                color: Color.popups.text
-                font.family: Style.fontFamily
-                font.pixelSize: Style.fontPx(0.8)
-              }
-            }
-
-            Text {
-              id: cardTitle
-              x: 6
-              y: thumbBox.y + thumbBox.height + 6
-              width: parent.width - 12
-              text: card.modelData.title || ""
-              color: Color.popups.text
-              font.family: Style.fontFamily
-              font.pixelSize: Style.fontPx(0.9)
-              elide: Text.ElideRight
-              maximumLineCount: 1
-              horizontalAlignment: Text.AlignHCenter
-            }
-
-            MouseArea {
-              id: cardMouse
-              anchors.fill: parent
-              hoverEnabled: true
-              acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-              onClicked: function(event) {
-                if (event.button === Qt.MiddleButton) {
-                  win.dock.closeWindow(card.modelData)
-                  return
-                }
-                var host = win
-                var target = card.modelData
-                host.dock.activateWindow(target)
-                host.previewKey = ""
-              }
-            }
-
-            Rectangle {
-              visible: cardMouse.containsMouse || closeMouse.containsMouse
-              anchors.top: parent.top
-              anchors.right: parent.right
-              anchors.margins: 8
-              width: 20
-              height: 20
-              radius: Math.min(10, Style.cornerRadius + 2)
-              color: closeMouse.containsMouse ? Color.urgent : Color.popups.background
-              border.width: 1
-              border.color: Util.alpha(Color.popups.text, 0.4)
-
-              Text {
-                anchors.centerIn: parent
-                text: "\u00d7"
-                color: Color.popups.text
-                font.family: Style.fontFamily
-                font.pixelSize: Style.fontPx(1.1)
-              }
-
-              MouseArea {
-                id: closeMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: win.dock.closeWindow(card.modelData)
-              }
-            }
+            onCloseRequested: win.dock.closeWindow(toplevel)
           }
         }
       }

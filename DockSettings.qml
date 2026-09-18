@@ -1,6 +1,5 @@
 import QtQuick
 import Quickshell
-import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.Commons
 
@@ -19,15 +18,7 @@ PanelWindow {
     return choices
   }
 
-  function targetScreen() {
-    var focused = Hyprland.focusedMonitor
-    var screens = Quickshell.screens
-    for (var i = 0; i < screens.length; i++)
-      if (focused && screens[i].name === focused.name) return screens[i]
-    return screens.length > 0 ? screens[0] : null
-  }
-
-  onOpenedChanged: if (opened) screen = targetScreen()
+  onOpenedChanged: if (opened) screen = dock.focusedScreen()
 
   visible: opened
   color: "transparent"
