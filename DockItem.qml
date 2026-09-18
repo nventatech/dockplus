@@ -13,6 +13,8 @@ DockSlot {
   readonly property var minimizedWindows: windows.filter(function(window) { return item.dock.isMinimized(window) })
   readonly property bool focused: openWindows.some(function(window) { return window.activated })
   readonly property bool allMinimized: windows.length > 0 && openWindows.length === 0
+  readonly property bool launching: dock.isLaunching(appKey)
+  property real bounce: 0
   readonly property string appId: windows.length > 0 ? dock.appIdOf(windows[0]) : appKey
   readonly property var indicators: {
     var states = []
@@ -77,6 +79,20 @@ DockSlot {
     scale: item.pressed ? 0.9 : item.hovered ? 1.1 : 1
     Behavior on opacity { NumberAnimation { duration: 140 } }
     Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+
+    transform: Translate {
+      x: item.host.position === "left" ? item.bounce : item.host.position === "right" ? -item.bounce : 0
+      y: item.host.vertical ? 0 : -item.bounce
+    }
+  }
+
+  SequentialAnimation {
+    running: item.launching
+    loops: Animation.Infinite
+    onRunningChanged: if (!running) item.bounce = 0
+    NumberAnimation { target: item; property: "bounce"; to: item.host.iconSize * 0.25; duration: 260; easing.type: Easing.OutQuad }
+    NumberAnimation { target: item; property: "bounce"; to: 0; duration: 260; easing.type: Easing.InQuad }
+    PauseAnimation { duration: 180 }
   }
 
   Grid {

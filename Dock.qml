@@ -19,6 +19,8 @@ Item {
   property var minimizeOrder: []
   property int entriesRevision: 0
   readonly property int maxActions: 10
+  readonly property int launchTimeout: 10000
+  property var launching: ({})
 
   property var clients: ({})
   readonly property var toplevels: Hyprland.toplevels.values.filter(function(toplevel) {
@@ -254,7 +256,29 @@ Item {
 
   function launch(key) {
     if (!key) return
+    markLaunching(key)
     Quickshell.execDetached(["uwsm-app", "--", "gtk-launch", key + ".desktop"])
+  }
+
+  function markLaunching(key) {
+    var next = Object.assign({}, launching)
+    next[key] = { count: windowsOf(key).length, until: Date.now() + launchTimeout }
+    launching = next
+  }
+
+  function isLaunching(key) {
+    var info = launching[key]
+    return !!info && Date.now() < info.until && windowsOf(key).length <= info.count
+  }
+
+  function pruneLaunching() {
+    var next = ({})
+    var changed = false
+    for (var key in launching) {
+      if (isLaunching(key)) next[key] = launching[key]
+      else changed = true
+    }
+    if (changed) launching = next
   }
 
   function activateApp(key) {
@@ -375,6 +399,13 @@ Item {
     id: clientsQuery
     command: ["hyprctl", "-j", "clients"]
     stdout: StdioCollector { onStreamFinished: root.applyClients(text) }
+  }
+
+  Timer {
+    interval: 500
+    repeat: true
+    running: Object.keys(root.launching).length > 0
+    onTriggered: root.pruneLaunching()
   }
 
   Timer { id: refreshSoon; interval: 60; onTriggered: clientsQuery.running = true }
