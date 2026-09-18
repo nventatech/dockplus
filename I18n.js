@@ -19,8 +19,11 @@ var tables = {
     safelyRemove: "Safely remove",
     showDrives: "Show removable drives",
     clickAction: "Click on an app",
-    appearance: "APPEARANCE",
-    behavior: "BEHAVIOR",
+    tabAppearance: "Appearance",
+    tabPosition: "Position",
+    tabBehavior: "Behavior",
+    tabItems: "Items",
+    edge: "Screen edge",
     backgroundOpacity: "Background opacity",
     indicatorStyle: "Window indicators",
     indicatorDefault: "Default",
@@ -46,13 +49,11 @@ var tables = {
     autohide: "Hide automatically",
     autohideHint: "Shows when the pointer touches the screen edge",
     iconSize: "Icon size",
-    position: "Position",
     positionBottom: "Bottom",
     positionLeft: "Left",
     positionRight: "Right",
     monitor: "Monitor",
-    allMonitors: "All",
-    done: "Done"
+    allMonitors: "All"
   },
   pt: {
     newWindow: "Nova janela",
@@ -72,8 +73,11 @@ var tables = {
     safelyRemove: "Remover com segurança",
     showDrives: "Mostrar discos removíveis",
     clickAction: "Clique no app",
-    appearance: "APARÊNCIA",
-    behavior: "COMPORTAMENTO",
+    tabAppearance: "Aparência",
+    tabPosition: "Posição",
+    tabBehavior: "Comportamento",
+    tabItems: "Itens",
+    edge: "Borda da tela",
     backgroundOpacity: "Opacidade do fundo",
     indicatorStyle: "Indicadores de janela",
     indicatorDefault: "Padrão",
@@ -99,13 +103,11 @@ var tables = {
     autohide: "Ocultar automaticamente",
     autohideHint: "Aparece quando o ponteiro encosta na borda da tela",
     iconSize: "Tamanho dos ícones",
-    position: "Posição",
     positionBottom: "Embaixo",
     positionLeft: "Esquerda",
     positionRight: "Direita",
     monitor: "Monitor",
-    allMonitors: "Todos",
-    done: "Concluir"
+    allMonitors: "Todos"
   }
 }
 
