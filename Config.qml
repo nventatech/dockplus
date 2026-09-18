@@ -20,11 +20,19 @@ Item {
   readonly property bool showAppsButton: adapter.showAppsButton
   readonly property bool showTrash: adapter.showTrash
   readonly property bool showDrives: adapter.showDrives
-  readonly property var pinned: {
+
+  readonly property var specials: ["@drives", "@trash", "@apps"]
+  readonly property var order: {
     var out = []
-    for (var i = 0; i < adapter.pinned.length; i++) out.push(String(adapter.pinned[i]))
+    for (var i = 0; i < adapter.pinned.length; i++) {
+      var token = String(adapter.pinned[i])
+      if (token && out.indexOf(token) === -1) out.push(token)
+    }
+    for (var j = 0; j < specials.length; j++)
+      if (out.indexOf(specials[j]) === -1) out.push(specials[j])
     return out
   }
+  readonly property var pinned: order.filter(function(token) { return !root.isSpecial(token) })
 
   function setAutohide(value) { adapter.autohide = value === true }
   function setIconSize(value) { adapter.iconSize = Math.max(minIconSize, Math.min(maxIconSize, Math.round(value))) }
@@ -35,26 +43,32 @@ Item {
   function setShowTrash(value) { adapter.showTrash = value === true }
   function setShowDrives(value) { adapter.showDrives = value === true }
 
+  function isSpecial(token) { return String(token).charAt(0) === "@" }
+
   function isPinned(key) { return pinned.indexOf(key) !== -1 }
 
+  function setOrder(tokens) { adapter.pinned = tokens }
+
   function pin(key) {
-    if (!key || isPinned(key)) return
-    adapter.pinned = pinned.concat([key])
+    if (!key || isSpecial(key) || isPinned(key)) return
+    var next = order.slice()
+    var lastApp = -1
+    for (var i = 0; i < next.length; i++) if (!isSpecial(next[i])) lastApp = i
+    next.splice(lastApp + 1, 0, key)
+    setOrder(next)
   }
 
   function unpin(key) {
-    adapter.pinned = pinned.filter(function(entry) { return entry !== key })
+    if (isSpecial(key)) return
+    setOrder(order.filter(function(token) { return token !== key }))
   }
 
-  function movePinned(key, toIndex) {
-    var from = pinned.indexOf(key)
-    if (from === -1) return
-    var target = Math.max(0, Math.min(pinned.length - 1, Math.round(toIndex)))
-    if (target === from) return
-    var next = pinned.slice()
-    next.splice(from, 1)
-    next.splice(target, 0, key)
-    adapter.pinned = next
+  function moveEntry(token, toIndex) {
+    if (!token || (isSpecial(token) && specials.indexOf(token) === -1)) return
+    var next = order.filter(function(other) { return other !== token })
+    var target = Math.max(0, Math.min(next.length, Math.round(toIndex)))
+    next.splice(target, 0, token)
+    setOrder(next)
   }
 
   FileView {

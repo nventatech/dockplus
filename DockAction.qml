@@ -2,11 +2,9 @@ import QtQuick
 import Quickshell
 import qs.Commons
 
-Item {
+DockSlot {
   id: item
 
-  property var host
-  property string label: ""
   property var iconNames: []
   property Component glyph: null
   property bool marked: false
@@ -19,26 +17,25 @@ Item {
     }
     return ""
   }
-  readonly property real iconX: host.itemPadding + (host.position === "left" ? host.indicatorSpace : 0)
 
   signal activated()
 
-  width: host.iconSize + host.itemPadding * 2 + (host.vertical ? host.indicatorSpace : 0)
-  height: host.iconSize + host.itemPadding * 2 + (host.vertical ? 0 : host.indicatorSpace)
-
-  Rectangle {
-    anchors.fill: parent
-    radius: Style.cornerRadius
-    color: Util.alpha(Color.bar.text, mouse.pressed ? 0.16 : mouse.containsMouse ? 0.09 : 0)
-    Behavior on color { ColorAnimation { duration: 100 } }
+  onClicked: function(button) {
+    if (button === Qt.LeftButton) {
+      activated()
+      return
+    }
+    if (button !== Qt.RightButton) return
+    var entries = typeof menuBuilder === "function" ? menuBuilder(item) : []
+    if (entries.length > 0) host.openMenu(item, entries)
   }
 
   Item {
     x: item.iconX
-    y: item.host.itemPadding
+    y: item.iconY
     width: item.host.iconSize
     height: item.host.iconSize
-    scale: mouse.pressed ? 0.9 : mouse.containsMouse ? 1.1 : 1
+    scale: item.pressed ? 0.9 : item.hovered ? 1.1 : 1
     Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
 
     Image {
@@ -67,22 +64,4 @@ Item {
     radius: 2
     color: Util.alpha(Color.bar.text, 0.7)
   }
-
-  MouseArea {
-    id: mouse
-    anchors.fill: parent
-    hoverEnabled: true
-    acceptedButtons: Qt.LeftButton | Qt.RightButton
-    onContainsMouseChanged: item.host.setHovered(item, containsMouse)
-    onClicked: function(event) {
-      if (event.button === Qt.LeftButton) {
-        item.activated()
-        return
-      }
-      var entries = typeof item.menuBuilder === "function" ? item.menuBuilder() : []
-      if (entries.length > 0) item.host.openMenu(item, entries)
-    }
-  }
-
-  Component.onDestruction: host.setHovered(item, false)
 }

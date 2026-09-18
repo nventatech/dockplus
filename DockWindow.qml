@@ -45,8 +45,6 @@ PanelWindow {
   property string previewKey: ""
   property real previewCenter: 0
   readonly property bool previewOpen: previewKey !== ""
-  readonly property var shownDrives: dock.config.showDrives ? dock.drives.drives : []
-  readonly property bool extrasVisible: dock.config.showAppsButton || dock.config.showTrash || shownDrives.length > 0
   readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey) : []
 
   readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
@@ -109,12 +107,12 @@ PanelWindow {
     return entries
   }
 
-  function trashMenu() {
+  function trashMenu(anchor) {
     var trash = dock.trash
     var entries = [{ label: dock.tr("open"), run: function() { trash.open() } }]
     if (trash.count > 0) entries.push({
       label: dock.tr("emptyTrash") + " (" + trash.count + ")",
-      run: function() { win.openMenu(trashItem, win.confirmEmptyTrashMenu()) }
+      run: function() { win.openMenu(anchor, win.confirmEmptyTrashMenu()) }
     })
     return entries
   }
@@ -246,88 +244,22 @@ PanelWindow {
         spacing: win.itemSpacing
 
         Repeater {
-          model: ScriptModel { values: win.dock.appKeys }
-          DockItem {
-            required property string modelData
+          model: ScriptModel {
+            objectProp: "key"
+            values: win.dock.entries
+          }
+
+          DockEntry {
             dock: win.dock
             host: win
-            appKey: modelData
-          }
-        }
-
-        Item {
-          visible: win.extrasVisible && win.dock.appKeys.length > 0
-          width: win.vertical ? win.iconSize + win.itemPadding * 2 + win.indicatorSpace : 9
-          height: win.vertical ? 9 : win.iconSize + win.itemPadding * 2 + win.indicatorSpace
-
-          Rectangle {
-            anchors.centerIn: parent
-            width: win.vertical ? Math.round(win.iconSize * 0.6) : 1
-            height: win.vertical ? 1 : Math.round(win.iconSize * 0.6)
-            color: Util.alpha(Color.bar.text, 0.25)
-          }
-        }
-
-        Repeater {
-          model: ScriptModel { values: win.shownDrives }
-
-          DockAction {
-            required property var modelData
-            host: win
-            label: modelData.label || modelData.size
-            iconNames: ["drive-removable-media-usb", "drive-removable-media", "media-removable", "drive-harddisk"]
-            marked: modelData.mounted
-            onActivated: win.dock.drives.open(modelData)
-            menuBuilder: function() { return win.driveMenu(modelData) }
-          }
-        }
-
-        DockAction {
-          id: trashItem
-          visible: win.dock.config.showTrash
-          host: win
-          label: win.dock.tr("trash") + (win.dock.trash.count > 0 ? " (" + win.dock.trash.count + ")" : "")
-          iconNames: win.dock.trash.full ? ["user-trash-full", "user-trash"] : ["user-trash"]
-          onActivated: win.dock.trash.open()
-          menuBuilder: win.trashMenu
-        }
-
-        DockAction {
-          visible: win.dock.config.showAppsButton
-          host: win
-          label: win.dock.tr("applications")
-          glyph: appsGlyph
-          onActivated: win.dock.openAppsMenu()
-          menuBuilder: win.backgroundMenu
-        }
-      }
-
-      Component {
-        id: appsGlyph
-
-        Item {
-          Grid {
-            anchors.centerIn: parent
-            columns: 3
-            spacing: Math.round(win.iconSize * 0.09)
-
-            Repeater {
-              model: 9
-              Rectangle {
-                width: Math.round(win.iconSize * 0.17)
-                height: width
-                radius: Math.round(width * 0.3)
-                color: Color.bar.text
-              }
-            }
           }
         }
       }
 
       Rectangle {
         readonly property var source: win.dragItem
-        readonly property bool active: source !== null && source.dropIndex >= 0 && source.dropIndex !== source.pinnedIndex
-        readonly property int slot: !active ? 0 : source.dropIndex > source.pinnedIndex ? source.dropIndex + 1 : source.dropIndex
+        readonly property bool active: source !== null && source.dropIndex >= 0 && source.dropIndex !== source.renderedIndex
+        readonly property int slot: !active ? 0 : source.dropIndex > source.renderedIndex ? source.dropIndex + 1 : source.dropIndex
         readonly property real along: slot * win.slotSize - Math.round(win.itemSpacing / 2) - 1
         readonly property real across: win.itemPadding + (win.position === "left" ? win.indicatorSpace : 0)
 

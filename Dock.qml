@@ -23,13 +23,35 @@ Item {
     return root.clients["0x" + toplevel.address] !== undefined
   })
 
-  readonly property var appKeys: {
-    var keys = config.pinned.slice()
+  readonly property var entries: {
+    var order = config.order
+    var running = []
     for (var i = 0; i < toplevels.length; i++) {
       var key = keyOf(toplevels[i])
-      if (keys.indexOf(key) === -1) keys.push(key)
+      if (order.indexOf(key) === -1 && running.indexOf(key) === -1) running.push(key)
     }
-    return keys
+    var lastApp = -1
+    for (var j = 0; j < order.length; j++) if (!config.isSpecial(order[j])) lastApp = j
+    var out = []
+    function pushRunning() {
+      for (var r = 0; r < running.length; r++) out.push({ kind: "app", token: "", key: running[r] })
+    }
+    if (lastApp === -1) pushRunning()
+    for (var k = 0; k < order.length; k++) {
+      var token = order[k]
+      if (token === "@trash") {
+        if (config.showTrash) out.push({ kind: "trash", token: token, key: token })
+      } else if (token === "@apps") {
+        if (config.showAppsButton) out.push({ kind: "apps", token: token, key: token })
+      } else if (token === "@drives") {
+        var list = config.showDrives ? drives.drives : []
+        for (var d = 0; d < list.length; d++) out.push({ kind: "drive", token: token, key: list[d].device + "|" + list[d].mountpoint, drive: list[d] })
+      } else if (!config.isSpecial(token)) {
+        out.push({ kind: "app", token: token, key: token })
+      }
+      if (k === lastApp) pushRunning()
+    }
+    return out
   }
 
   readonly property var minimizedWindows: {
@@ -84,9 +106,28 @@ Item {
     config.unpin(entry ? entry.id : appId)
   }
 
-  function movePinnedApp(appId, index) {
-    var entry = entryFor(appId)
-    config.movePinned(entry ? entry.id : appId, index)
+  function moveEntry(name, index) {
+    var entry = config.isSpecial(name) ? null : entryFor(name)
+    config.moveEntry(entry ? entry.id : name, index)
+  }
+
+  function moveRendered(from, to) {
+    var dragged = entries[from]
+    var anchor = entries[to]
+    if (!dragged || !anchor || from === to) return
+    var token = dragged.token || dragged.key
+    var order = config.order.filter(function(other) { return other !== token })
+    var anchorToken = anchor.token
+    if (anchorToken === token) return
+    var after = to > from
+    if (!anchorToken) {
+      anchorToken = config.pinned.length > 0 ? config.pinned[config.pinned.length - 1] : ""
+      if (anchorToken === token) anchorToken = config.pinned.length > 1 ? config.pinned[config.pinned.length - 2] : ""
+      after = true
+    }
+    var index = anchorToken ? order.indexOf(anchorToken) : -1
+    order.splice(index === -1 ? 0 : (after ? index + 1 : index), 0, token)
+    config.setOrder(order)
   }
 
   function keyOf(toplevel) {
@@ -243,7 +284,7 @@ Item {
     function settings(): void { root.openSettings() }
     function pin(appId: string): void { root.pinApp(appId) }
     function unpin(appId: string): void { root.unpinApp(appId) }
-    function move(appId: string, index: int): void { root.movePinnedApp(appId, index) }
+    function move(name: string, index: int): void { root.moveEntry(name, index) }
     function position(value: string): void { root.config.setPosition(value) }
   }
 
