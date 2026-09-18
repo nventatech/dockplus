@@ -304,6 +304,14 @@ PanelWindow {
 
         ToggleRow {
           width: parent.width
+          label: win.dock.tr("showPinned")
+          hint: win.dock.tr("showPinnedHint")
+          checked: win.config.showPinned
+          onToggled: function(value) { win.config.setShowPinned(value) }
+        }
+
+        ToggleRow {
+          width: parent.width
           label: win.dock.tr("showAppsButton")
           checked: win.config.showAppsButton
           onToggled: function(value) { win.config.setShowAppsButton(value) }

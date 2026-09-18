@@ -20,6 +20,7 @@ Item {
   readonly property bool showAppsButton: adapter.showAppsButton
   readonly property bool showTrash: adapter.showTrash
   readonly property bool showDrives: adapter.showDrives
+  readonly property bool showPinned: adapter.showPinned
   readonly property int minOpacity: 40
   readonly property var indicatorStyles: ["default", "dots", "dashes", "segments"]
   readonly property string indicatorStyle: indicatorStyles.indexOf(adapter.indicatorStyle) !== -1 ? adapter.indicatorStyle : "default"
@@ -52,6 +53,7 @@ Item {
   function setShowAppsButton(value) { adapter.showAppsButton = value === true }
   function setShowTrash(value) { adapter.showTrash = value === true }
   function setShowDrives(value) { adapter.showDrives = value === true }
+  function setShowPinned(value) { adapter.showPinned = value === true }
   function setIndicatorStyle(value) { if (indicatorStyles.indexOf(value) !== -1) adapter.indicatorStyle = value }
   function setBackgroundOpacity(value) { adapter.backgroundOpacity = Math.max(minOpacity, Math.min(100, Math.round(value))) }
   function setPanelMode(value) { adapter.panelMode = value === true }
@@ -108,6 +110,7 @@ Item {
       property bool showAppsButton: true
       property bool showTrash: true
       property bool showDrives: true
+      property bool showPinned: true
       property string clickAction: "smart"
       property bool isolateMonitors: false
       property bool superNumbers: false

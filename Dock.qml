@@ -56,7 +56,7 @@ Item {
         var list = config.showDrives ? drives.drives : []
         for (var d = 0; d < list.length; d++) out.push({ kind: "drive", token: token, key: list[d].device + "|" + list[d].mountpoint, drive: list[d] })
       } else if (!config.isSpecial(token)) {
-        out.push({ kind: "app", token: token, key: token })
+        if (config.showPinned || windowsOf(token, scope).length > 0) out.push({ kind: "app", token: token, key: token })
       }
       if (k === lastApp) pushRunning()
     }
