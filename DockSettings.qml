@@ -72,57 +72,12 @@ PanelWindow {
         font.bold: true
       }
 
-      Item {
+      ToggleRow {
         width: parent.width
-        height: Math.max(autohideLabels.implicitHeight, 24)
-
-        Column {
-          id: autohideLabels
-          width: parent.width - 64
-          spacing: 3
-
-          Text {
-            text: win.dock.tr("autohide")
-            color: Color.popups.text
-            font.family: Style.fontFamily
-            font.pixelSize: Style.fontPx(1)
-          }
-
-          Text {
-            width: parent.width
-            text: win.dock.tr("autohideHint")
-            color: Util.alpha(Color.popups.text, 0.6)
-            font.family: Style.fontFamily
-            font.pixelSize: Style.fontPx(0.9)
-            wrapMode: Text.WordWrap
-          }
-        }
-
-        Rectangle {
-          anchors.right: parent.right
-          anchors.verticalCenter: parent.verticalCenter
-          width: 44
-          height: 24
-          radius: Math.min(12, Style.cornerRadius + 2)
-          color: win.config.autohide ? Color.accent : Util.alpha(Color.popups.text, 0.2)
-          Behavior on color { ColorAnimation { duration: 120 } }
-
-          Rectangle {
-            width: 18
-            height: 18
-            y: 3
-            x: win.config.autohide ? parent.width - width - 3 : 3
-            radius: Math.min(9, Style.cornerRadius)
-            color: Color.popups.background
-            Behavior on x { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
-          }
-
-          MouseArea {
-            anchors.fill: parent
-            anchors.margins: -6
-            onClicked: win.config.setAutohide(!win.config.autohide)
-          }
-        }
+        label: win.dock.tr("autohide")
+        hint: win.dock.tr("autohideHint")
+        checked: win.config.autohide
+        onToggled: function(value) { win.config.setAutohide(value) }
       }
 
       Column {
@@ -232,6 +187,13 @@ PanelWindow {
           current: win.config.monitor
           onChosen: function(value) { win.config.setMonitor(value) }
         }
+      }
+
+      ToggleRow {
+        width: parent.width
+        label: win.dock.tr("showAppsButton")
+        checked: win.config.showAppsButton
+        onToggled: function(value) { win.config.setShowAppsButton(value) }
       }
 
       Item {

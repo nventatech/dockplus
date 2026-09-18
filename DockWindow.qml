@@ -45,6 +45,7 @@ PanelWindow {
   property string previewKey: ""
   property real previewCenter: 0
   readonly property bool previewOpen: previewKey !== ""
+  readonly property bool extrasVisible: dock.config.showAppsButton
   readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey) : []
 
   readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
@@ -213,7 +214,8 @@ PanelWindow {
       Grid {
         id: grid
         anchors.centerIn: parent
-        columns: win.vertical ? 1 : Math.max(1, win.dock.appKeys.length)
+        columns: win.vertical ? 1 : -1
+        rows: win.vertical ? -1 : 1
         spacing: win.itemSpacing
 
         Repeater {
@@ -223,6 +225,50 @@ PanelWindow {
             dock: win.dock
             host: win
             appKey: modelData
+          }
+        }
+
+        Item {
+          visible: win.extrasVisible && win.dock.appKeys.length > 0
+          width: win.vertical ? win.iconSize + win.itemPadding * 2 + win.indicatorSpace : 9
+          height: win.vertical ? 9 : win.iconSize + win.itemPadding * 2 + win.indicatorSpace
+
+          Rectangle {
+            anchors.centerIn: parent
+            width: win.vertical ? Math.round(win.iconSize * 0.6) : 1
+            height: win.vertical ? 1 : Math.round(win.iconSize * 0.6)
+            color: Util.alpha(Color.bar.text, 0.25)
+          }
+        }
+
+        DockAction {
+          visible: win.dock.config.showAppsButton
+          host: win
+          label: win.dock.tr("applications")
+          glyph: appsGlyph
+          onActivated: win.dock.openAppsMenu()
+          menuBuilder: win.backgroundMenu
+        }
+      }
+
+      Component {
+        id: appsGlyph
+
+        Item {
+          Grid {
+            anchors.centerIn: parent
+            columns: 3
+            spacing: Math.round(win.iconSize * 0.09)
+
+            Repeater {
+              model: 9
+              Rectangle {
+                width: Math.round(win.iconSize * 0.17)
+                height: width
+                radius: Math.round(width * 0.3)
+                color: Color.bar.text
+              }
+            }
           }
         }
       }

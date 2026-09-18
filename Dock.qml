@@ -183,6 +183,10 @@ Item {
     if (windows.length > 0) restoreWindow(windows[windows.length - 1])
   }
 
+  function openAppsMenu() {
+    Quickshell.execDetached(["omarchy-menu", "toggle", "apps"])
+  }
+
   function launch(key) {
     if (!key) return
     Quickshell.execDetached(["uwsm-app", "--", "gtk-launch", key + ".desktop"])
