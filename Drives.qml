@@ -83,6 +83,18 @@ Item {
       + 'out=$(udisksctl power-off -b "$disk" 2>&1) || notify-send "Dock" "$out"', [drive.disk].concat(mounted))
   }
 
+  function copyTo(drive, paths) {
+    if (paths.length === 0) return
+    run('dest=$1; dev=$2; shift 2\n'
+      + 'if [ -z "$dest" ]; then\n'
+      + '  out=$(udisksctl mount -b "$dev" 2>&1) || { notify-send "Dock" "$out"; exit 1; }\n'
+      + '  dest=$(printf "%s\\n" "$out" | sed -n "s/^Mounted .* at \\(.*\\)$/\\1/p"); dest=${dest%.}\n'
+      + 'fi\n'
+      + 'notify-send "Dock" "Copying $# item(s) to $dest"\n'
+      + 'if cp -r -n -- "$@" "$dest/"; then notify-send "Dock" "Copy to $dest finished"; else notify-send "Dock" "Copy to $dest failed"; fi',
+      [drive.mountpoint, drive.device].concat(paths))
+  }
+
   onActiveChanged: {
     if (active) refresh()
     else drives = []

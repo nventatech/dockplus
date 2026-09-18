@@ -24,6 +24,8 @@ Loader {
       host: loader.host
       renderedIndex: loader.index
       appKey: loader.modelData.key
+      acceptsDrops: entry !== null
+      onFilesDropped: function(urls) { loader.dock.openWith(appKey, urls) }
     }
   }
 
@@ -39,6 +41,8 @@ Loader {
       label: drive.label || drive.size
       iconNames: ["drive-removable-media-usb", "drive-removable-media", "media-removable", "drive-harddisk"]
       marked: drive.mounted
+      acceptsDrops: true
+      onFilesDropped: function(urls) { loader.dock.drives.copyTo(drive, loader.dock.localPaths(urls)) }
       onActivated: loader.dock.drives.open(drive)
       menuBuilder: function(anchor) { return loader.host.driveMenu(drive) }
     }
@@ -54,6 +58,8 @@ Loader {
       label: loader.dock.tr("trash") + (loader.dock.trash.count > 0 ? " (" + loader.dock.trash.count + ")" : "")
       iconNames: loader.dock.trash.full ? ["user-trash-full", "user-trash"] : ["user-trash"]
       onActivated: loader.dock.trash.open()
+      acceptsDrops: true
+      onFilesDropped: function(urls) { loader.dock.trash.trashFiles(urls) }
       menuBuilder: function(anchor) { return loader.host.trashMenu(anchor) }
     }
   }

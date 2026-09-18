@@ -115,6 +115,17 @@ Item {
     return out
   }
 
+  function localPaths(urls) {
+    return urls.filter(function(url) { return url.indexOf("file://") === 0 })
+      .map(function(url) { return decodeURIComponent(url.substring(7)) })
+  }
+
+  function openWith(key, urls) {
+    if (!key || urls.length === 0) return
+    markLaunching(key)
+    Quickshell.execDetached(["uwsm-app", "--", "gtk-launch", key + ".desktop"].concat(urls))
+  }
+
   function runAction(action) {
     if (!action) return
     if (action.command && action.command.length > 0)

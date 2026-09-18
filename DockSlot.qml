@@ -11,6 +11,7 @@ Item {
   property int dropIndex: -1
   property bool wasDragged: false
   property real lastWheel: 0
+  property bool acceptsDrops: false
 
   default property alias content: body.data
 
@@ -23,6 +24,7 @@ Item {
 
   signal clicked(int button)
   signal scrolled(int step)
+  signal filesDropped(var urls)
 
   function updateDrop() {
     var center = renderedIndex * host.slotSize + host.slotSize / 2 + (host.vertical ? body.y : body.x)
@@ -60,8 +62,25 @@ Item {
     Rectangle {
       anchors.fill: parent
       radius: Style.cornerRadius
-      color: Util.alpha(Color.bar.text, slot.pressed ? 0.16 : slot.hovered ? 0.09 : 0)
+      color: drop.containsDrag ? Util.alpha(Color.accent, 0.3)
+        : Util.alpha(Color.bar.text, slot.pressed ? 0.16 : slot.hovered ? 0.09 : 0)
       Behavior on color { ColorAnimation { duration: 100 } }
+    }
+  }
+
+  DropArea {
+    id: drop
+    anchors.fill: parent
+    enabled: slot.acceptsDrops
+    keys: ["text/uri-list"]
+    onEntered: slot.host.fileDragEnter()
+    onExited: slot.host.fileDragLeave()
+    onDropped: function(event) {
+      var urls = []
+      for (var i = 0; i < event.urls.length; i++) urls.push(String(event.urls[i]))
+      event.acceptProposedAction()
+      slot.host.fileDragDone()
+      if (urls.length > 0) slot.filesDropped(urls)
     }
   }
 

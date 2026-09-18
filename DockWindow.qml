@@ -36,10 +36,11 @@ PanelWindow {
   }
   readonly property bool fullscreenActive: hyprMonitor ? dock.fullscreenOn(hyprMonitor.name) : false
   readonly property bool wantShown: !fullscreenActive
-    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null || urgentReveal || numbersVisible)
+    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null || urgentReveal || numbersVisible || fileDragActive)
   property bool shown: !autohide
   property bool urgentReveal: false
   property bool numbersVisible: false
+  property bool fileDragActive: false
 
   property var hoveredItem: null
   property var dragItem: null
@@ -83,6 +84,18 @@ PanelWindow {
   function popupY(size, center) {
     if (!vertical) return panel.restY - size - popupGap
     return Math.max(4, Math.min(content.height - size - 4, Math.round(center - size / 2)))
+  }
+
+  function fileDragEnter() {
+    fileDragTimer.stop()
+    fileDragActive = true
+  }
+
+  function fileDragLeave() { fileDragTimer.restart() }
+
+  function fileDragDone() {
+    fileDragTimer.stop()
+    fileDragActive = false
   }
 
   function activateEntry(index) {
@@ -219,6 +232,7 @@ PanelWindow {
     }
   }
 
+  Timer { id: fileDragTimer; interval: 400; onTriggered: win.fileDragActive = false }
   Timer { id: numbersTimer; interval: 1500; onTriggered: win.numbersVisible = false }
   Timer { id: urgentTimer; interval: 3000; onTriggered: win.urgentReveal = false }
   Timer { id: showTimer; interval: 120; onTriggered: win.shown = true }
@@ -238,6 +252,14 @@ PanelWindow {
     anchors.fill: parent
 
     HoverHandler { id: hover }
+
+    DropArea {
+      anchors.fill: parent
+      keys: ["text/uri-list"]
+      onEntered: win.fileDragEnter()
+      onExited: win.fileDragLeave()
+      onDropped: win.fileDragDone()
+    }
 
     Rectangle {
       id: panel

@@ -19,6 +19,12 @@ Item {
     refresh()
   }
 
+  function trashFiles(urls) {
+    if (urls.length === 0) return
+    trashing.command = ["gio", "trash", "--"].concat(urls)
+    trashing.running = true
+  }
+
   function empty() {
     emptying.running = true
   }
@@ -33,6 +39,11 @@ Item {
         root.count = String(text || "").split("\n").filter(function(line) { return line.trim() !== "" }).length
       }
     }
+  }
+
+  Process {
+    id: trashing
+    onExited: root.refresh()
   }
 
   Process {
