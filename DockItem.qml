@@ -55,6 +55,8 @@ DockSlot {
 
   label: entry ? entry.name : (windows.length > 0 && windows[0].title ? windows[0].title : appId)
 
+  onScrolled: function(step) { dock.cycleWindows(appKey, step) }
+
   onClicked: function(button) {
     if (button === Qt.RightButton) host.openMenu(item, menuEntries())
     else if (button === Qt.MiddleButton) { if (entry) dock.launch(appKey) }

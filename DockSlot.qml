@@ -10,6 +10,7 @@ Item {
   property string label: ""
   property int dropIndex: -1
   property bool wasDragged: false
+  property real lastWheel: 0
 
   default property alias content: body.data
 
@@ -21,6 +22,7 @@ Item {
   readonly property int lastIndex: dock.entries.length - 1
 
   signal clicked(int button)
+  signal scrolled(int step)
 
   function updateDrop() {
     var center = renderedIndex * host.slotSize + host.slotSize / 2 + (host.vertical ? body.y : body.x)
@@ -78,6 +80,13 @@ Item {
     onContainsMouseChanged: slot.host.setHovered(slot, containsMouse)
     onClicked: function(event) {
       if (!slot.wasDragged) slot.clicked(event.button)
+    }
+    onWheel: function(wheel) {
+      var delta = wheel.angleDelta.y !== 0 ? wheel.angleDelta.y : wheel.angleDelta.x
+      var now = Date.now()
+      if (delta === 0 || now - slot.lastWheel < 250) return
+      slot.lastWheel = now
+      slot.scrolled(delta < 0 ? 1 : -1)
     }
   }
 

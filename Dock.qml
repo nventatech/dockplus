@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import "I18n.js" as I18n
+import "Logic.js" as Logic
 
 Item {
   id: root
@@ -264,6 +265,18 @@ Item {
     }
     if (windows[0].activated && !isMinimized(windows[0])) minimizeWindow(windows[0])
     else activateWindow(windows[0])
+  }
+
+  function openWindowsOf(key) {
+    return windowsOf(key).filter(function(toplevel) { return !root.isMinimized(toplevel) })
+  }
+
+  function cycleWindows(key, step) {
+    var open = openWindowsOf(key)
+    var current = -1
+    for (var i = 0; i < open.length; i++) if (open[i].activated) current = i
+    var next = Logic.nextIndex(open.length, current, step)
+    if (next >= 0 && next !== current) focusWindow(open[next])
   }
 
   function activateWindow(toplevel) {
