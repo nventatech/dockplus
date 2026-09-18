@@ -65,6 +65,27 @@ Item {
     }
   }
 
+  Rectangle {
+    visible: slot.host.numbersVisible && slot.renderedIndex >= 0 && slot.renderedIndex < 9
+    z: 5
+    x: slot.iconX - 4
+    y: slot.iconY - 4
+    width: Math.max(height, numberLabel.implicitWidth + 8)
+    height: numberLabel.implicitHeight + 4
+    radius: height / 2
+    color: Color.accent
+
+    Text {
+      id: numberLabel
+      anchors.centerIn: parent
+      text: slot.renderedIndex + 1
+      color: Color.bar.background
+      font.family: Style.fontFamily
+      font.pixelSize: Style.fontPx(0.9)
+      font.bold: true
+    }
+  }
+
   MouseArea {
     id: mouse
     anchors.fill: parent

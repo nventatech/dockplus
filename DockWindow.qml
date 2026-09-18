@@ -35,9 +35,10 @@ PanelWindow {
   }
   readonly property bool fullscreenActive: hyprMonitor ? dock.fullscreenOn(hyprMonitor.name) : false
   readonly property bool wantShown: !fullscreenActive
-    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null || urgentReveal)
+    && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null || urgentReveal || numbersVisible)
   property bool shown: !autohide
   property bool urgentReveal: false
+  property bool numbersVisible: false
 
   property var hoveredItem: null
   property var dragItem: null
@@ -81,6 +82,15 @@ PanelWindow {
   function popupY(size, center) {
     if (!vertical) return panel.restY - size - popupGap
     return Math.max(4, Math.min(content.height - size - 4, Math.round(center - size / 2)))
+  }
+
+  function activateEntry(index) {
+    if (index < 0 || index >= entries.length) return
+    if (!fullscreenActive) {
+      numbersVisible = true
+      numbersTimer.restart()
+    }
+    dock.activateEntry(entries[index], scope)
   }
 
   function togglePreview(item) {
@@ -208,6 +218,7 @@ PanelWindow {
     }
   }
 
+  Timer { id: numbersTimer; interval: 1500; onTriggered: win.numbersVisible = false }
   Timer { id: urgentTimer; interval: 3000; onTriggered: win.urgentReveal = false }
   Timer { id: showTimer; interval: 120; onTriggered: win.shown = true }
   Timer { id: hideTimer; interval: 450; onTriggered: win.shown = win.wantShown }

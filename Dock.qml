@@ -390,6 +390,27 @@ Item {
 
   function togglePicker() { picker.toggle() }
 
+  function focusedDock() {
+    var windows = docks.instances
+    var focused = Hyprland.focusedMonitor
+    for (var i = 0; i < windows.length; i++)
+      if (focused && windows[i].screen && windows[i].screen.name === focused.name) return windows[i]
+    return windows.length > 0 ? windows[0] : null
+  }
+
+  function activateIndex(index) {
+    var dockWindow = focusedDock()
+    if (dockWindow) dockWindow.activateEntry(index - 1)
+  }
+
+  function activateEntry(entry, scope) {
+    if (!entry) return
+    if (entry.kind === "app") cycleClick(entry.key, scope)
+    else if (entry.kind === "trash") trash.open()
+    else if (entry.kind === "apps") openAppsMenu()
+    else if (entry.kind === "drive") drives.open(entry.drive)
+  }
+
   function screenEnabled(screen) {
     return config.monitor === "" || config.monitor === screen.name
   }
@@ -416,6 +437,7 @@ Item {
     function unpin(appId: string): void { root.unpinApp(appId) }
     function move(name: string, index: int): void { root.moveEntry(name, index) }
     function position(value: string): void { root.config.setPosition(value) }
+    function activate(index: int): void { root.activateIndex(index) }
   }
 
   Connections {
@@ -480,6 +502,7 @@ Item {
   Component.onCompleted: clientsQuery.running = true
 
   Variants {
+    id: docks
     model: {
       var position = root.config.position
       return Quickshell.screens.filter(function(screen) { return root.screenEnabled(screen) })
