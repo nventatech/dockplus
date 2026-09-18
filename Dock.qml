@@ -328,6 +328,19 @@ Item {
     if (next >= 0 && next !== current) focusWindow(open[next])
   }
 
+  function cycleClick(key) {
+    var windows = windowsOf(key)
+    var open = openWindowsOf(key)
+    var focused = -1
+    for (var i = 0; i < open.length; i++) if (open[i].activated) focused = i
+    var decision = Logic.cycleDecision(windows.length, open.length, focused)
+    if (decision === "launch") launch(key)
+    else if (decision === "restore") restoreWindow(windows[windows.length - 1])
+    else if (decision === "focus") focusWindow(open[0])
+    else if (decision === "minimize") minimizeWindow(open[0])
+    else cycleWindows(key, 1)
+  }
+
   function activateWindow(toplevel) {
     if (isMinimized(toplevel)) restoreWindow(toplevel)
     else focusWindow(toplevel)

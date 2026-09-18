@@ -57,6 +57,14 @@ DockSlot {
     return entries
   }
 
+  function leftClick() {
+    var mode = dock.config.clickAction
+    if (mode === "launch" && entry) dock.launch(appKey)
+    else if (mode === "cycle") dock.cycleClick(appKey)
+    else if (windows.length > 1) host.togglePreview(item)
+    else dock.activateApp(appKey)
+  }
+
   label: entry ? entry.name : (windows.length > 0 && windows[0].title ? windows[0].title : appId)
 
   onScrolled: function(step) { dock.cycleWindows(appKey, step) }
@@ -64,8 +72,7 @@ DockSlot {
   onClicked: function(button) {
     if (button === Qt.RightButton) host.openMenu(item, menuEntries())
     else if (button === Qt.MiddleButton) { if (entry) dock.launch(appKey) }
-    else if (windows.length > 1) host.togglePreview(item)
-    else dock.activateApp(appKey)
+    else leftClick()
   }
 
   Image {

@@ -16,6 +16,11 @@ PanelWindow {
     { value: "left", label: dock.tr("positionLeft") },
     { value: "right", label: dock.tr("positionRight") }
   ]
+  readonly property var clickChoices: [
+    { value: "smart", label: dock.tr("clickSmart") },
+    { value: "cycle", label: dock.tr("clickCycle") },
+    { value: "launch", label: dock.tr("clickLaunch") }
+  ]
   readonly property var monitorChoices: {
     var choices = [{ value: "", label: dock.tr("allMonitors") }]
     var screens = Quickshell.screens
@@ -148,6 +153,25 @@ PanelWindow {
             onPressed: function(event) { slider.apply(event.x) }
             onPositionChanged: function(event) { if (pressed) slider.apply(event.x) }
           }
+        }
+      }
+
+      Column {
+        width: parent.width
+        spacing: 10
+
+        Text {
+          text: win.dock.tr("clickAction")
+          color: Color.popups.text
+          font.family: Style.fontFamily
+          font.pixelSize: Style.fontPx(1)
+        }
+
+        ChoiceChips {
+          width: parent.width
+          options: win.clickChoices
+          current: win.config.clickAction
+          onChosen: function(value) { win.config.setClickAction(value) }
         }
       }
 

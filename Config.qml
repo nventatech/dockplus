@@ -20,6 +20,8 @@ Item {
   readonly property bool showAppsButton: adapter.showAppsButton
   readonly property bool showTrash: adapter.showTrash
   readonly property bool showDrives: adapter.showDrives
+  readonly property var clickActions: ["smart", "cycle", "launch"]
+  readonly property string clickAction: clickActions.indexOf(adapter.clickAction) !== -1 ? adapter.clickAction : "smart"
 
   readonly property var specials: ["@drives", "@trash", "@apps"]
   readonly property var order: {
@@ -42,6 +44,7 @@ Item {
   function setShowAppsButton(value) { adapter.showAppsButton = value === true }
   function setShowTrash(value) { adapter.showTrash = value === true }
   function setShowDrives(value) { adapter.showDrives = value === true }
+  function setClickAction(value) { if (clickActions.indexOf(value) !== -1) adapter.clickAction = value }
 
   function isSpecial(token) { return String(token).charAt(0) === "@" }
 
@@ -91,6 +94,7 @@ Item {
       property bool showAppsButton: true
       property bool showTrash: true
       property bool showDrives: true
+      property string clickAction: "smart"
       property list<string> pinned: []
     }
   }
