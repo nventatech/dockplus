@@ -45,7 +45,7 @@ PanelWindow {
   property string previewKey: ""
   property real previewCenter: 0
   readonly property bool previewOpen: previewKey !== ""
-  readonly property bool extrasVisible: dock.config.showAppsButton
+  readonly property bool extrasVisible: dock.config.showAppsButton || dock.config.showTrash
   readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey) : []
 
   readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
@@ -98,6 +98,24 @@ PanelWindow {
   function runMenuEntry(entry) {
     menuOpen = false
     if (entry && typeof entry.run === "function") entry.run()
+  }
+
+  function trashMenu() {
+    var trash = dock.trash
+    var entries = [{ label: dock.tr("open"), run: function() { trash.open() } }]
+    if (trash.count > 0) entries.push({
+      label: dock.tr("emptyTrash") + " (" + trash.count + ")",
+      run: function() { win.openMenu(trashItem, win.confirmEmptyTrashMenu()) }
+    })
+    return entries
+  }
+
+  function confirmEmptyTrashMenu() {
+    var trash = dock.trash
+    return [
+      { label: dock.tr("confirmEmptyTrash").replace("%1", trash.count), run: function() { trash.empty() } },
+      { label: dock.tr("cancel"), run: function() {} }
+    ]
   }
 
   function backgroundMenu() {
@@ -239,6 +257,16 @@ PanelWindow {
             height: win.vertical ? 1 : Math.round(win.iconSize * 0.6)
             color: Util.alpha(Color.bar.text, 0.25)
           }
+        }
+
+        DockAction {
+          id: trashItem
+          visible: win.dock.config.showTrash
+          host: win
+          label: win.dock.tr("trash") + (win.dock.trash.count > 0 ? " (" + win.dock.trash.count + ")" : "")
+          iconNames: win.dock.trash.full ? ["user-trash-full", "user-trash"] : ["user-trash"]
+          onActivated: win.dock.trash.open()
+          menuBuilder: win.trashMenu
         }
 
         DockAction {

@@ -13,6 +13,7 @@ Item {
   readonly property string minimizedWorkspace: "special:minimized"
   readonly property string lang: Qt.locale().name.indexOf("pt") === 0 ? "pt" : "en"
   property alias config: dockConfig
+  property alias trash: dockTrash
   property var minimizeOrder: []
   property int entriesRevision: 0
 
@@ -222,6 +223,11 @@ Item {
   }
 
   Config { id: dockConfig }
+
+  Trash {
+    id: dockTrash
+    active: dockConfig.showTrash
+  }
 
   IpcHandler {
     target: "dock"

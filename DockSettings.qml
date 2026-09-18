@@ -196,6 +196,13 @@ PanelWindow {
         onToggled: function(value) { win.config.setShowAppsButton(value) }
       }
 
+      ToggleRow {
+        width: parent.width
+        label: win.dock.tr("showTrash")
+        checked: win.config.showTrash
+        onToggled: function(value) { win.config.setShowTrash(value) }
+      }
+
       Item {
         width: parent.width
         height: doneButton.height
