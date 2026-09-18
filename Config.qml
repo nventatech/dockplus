@@ -15,6 +15,8 @@ Item {
   readonly property bool autohide: adapter.autohide
   readonly property int iconSize: Math.max(minIconSize, Math.min(maxIconSize, adapter.iconSize))
   readonly property string monitor: adapter.monitor
+  readonly property var positions: ["bottom", "left", "right"]
+  readonly property string position: positions.indexOf(adapter.position) !== -1 ? adapter.position : "bottom"
   readonly property var pinned: {
     var out = []
     for (var i = 0; i < adapter.pinned.length; i++) out.push(String(adapter.pinned[i]))
@@ -24,6 +26,7 @@ Item {
   function setAutohide(value) { adapter.autohide = value === true }
   function setIconSize(value) { adapter.iconSize = Math.max(minIconSize, Math.min(maxIconSize, Math.round(value))) }
   function setMonitor(name) { adapter.monitor = String(name || "") }
+  function setPosition(value) { if (positions.indexOf(value) !== -1) adapter.position = value }
 
   function isPinned(key) { return pinned.indexOf(key) !== -1 }
 
@@ -63,6 +66,7 @@ Item {
       property bool autohide: true
       property int iconSize: 48
       property string monitor: ""
+      property string position: "bottom"
       property list<string> pinned: []
     }
   }

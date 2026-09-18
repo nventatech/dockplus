@@ -10,15 +10,20 @@ PanelWindow {
   required property var modelData
   property var dock
 
+  readonly property string position: modelData.position
+  readonly property bool vertical: position !== "bottom"
+
   readonly property int iconSize: dock.config.iconSize
   readonly property int itemPadding: Math.round(iconSize * 0.14)
   readonly property int indicatorSpace: 7
   readonly property int panelPadding: 6
   readonly property int itemSpacing: 2
   readonly property int slotSize: iconSize + itemPadding * 2 + itemSpacing
-  readonly property int panelHeight: iconSize + itemPadding * 2 + indicatorSpace + panelPadding * 2
+  readonly property int panelThickness: iconSize + itemPadding * 2 + indicatorSpace + panelPadding * 2
   readonly property int edgeGap: 8
-  readonly property int overlaySpace: 240
+  readonly property int edgeSpace: panelThickness + edgeGap
+  readonly property int overlaySpace: vertical ? 380 : 240
+  readonly property int popupGap: 8
   readonly property int revealStrip: 2
   readonly property int borderWidth: Math.max(1, Style.space(2))
 
@@ -42,7 +47,35 @@ PanelWindow {
   readonly property bool previewOpen: previewKey !== ""
   readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey) : []
 
+  readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
+  readonly property rect inputRect: {
+    if (shown) {
+      if (position === "left") return Qt.rect(0, panel.y, edgeSpace, panel.height)
+      if (position === "right") return Qt.rect(width - edgeSpace, panel.y, edgeSpace, panel.height)
+      return Qt.rect(panel.x, overlaySpace, panel.width, height - overlaySpace)
+    }
+    if (position === "left") return Qt.rect(0, Math.round((height - stripLength) / 2), revealStrip, stripLength)
+    if (position === "right") return Qt.rect(width - revealStrip, Math.round((height - stripLength) / 2), revealStrip, stripLength)
+    return Qt.rect(Math.round((width - stripLength) / 2), height - revealStrip, stripLength, revealStrip)
+  }
+
   onPreviewWindowsChanged: if (previewOpen && previewWindows.length === 0) previewKey = ""
+
+  function mainCenter(item) {
+    var point = item.mapToItem(content, item.width / 2, item.height / 2)
+    return vertical ? point.y : point.x
+  }
+
+  function popupX(size, center) {
+    if (position === "left") return panel.restX + panelThickness + popupGap
+    if (position === "right") return panel.restX - size - popupGap
+    return Math.max(4, Math.min(content.width - size - 4, Math.round(center - size / 2)))
+  }
+
+  function popupY(size, center) {
+    if (!vertical) return panel.restY - size - popupGap
+    return Math.max(4, Math.min(content.height - size - 4, Math.round(center - size / 2)))
+  }
 
   function togglePreview(item) {
     menuOpen = false
@@ -50,14 +83,14 @@ PanelWindow {
       previewKey = ""
       return
     }
-    previewCenter = item.mapToItem(content, item.width / 2, 0).x
+    previewCenter = mainCenter(item)
     previewKey = item.appKey
   }
 
   function openMenu(item, entries) {
     previewKey = ""
     menuEntries = entries
-    menuCenter = item ? item.mapToItem(content, item.width / 2, 0).x : width / 2
+    menuCenter = item ? mainCenter(item) : (vertical ? height : width) / 2
     menuOpen = true
   }
 
@@ -73,7 +106,7 @@ PanelWindow {
   function setHovered(item, hovered) {
     if (hovered) {
       hoveredItem = item
-      tooltipCenter = item.mapToItem(content, item.width / 2, 0).x
+      tooltipCenter = mainCenter(item)
     } else if (hoveredItem === item) {
       hoveredItem = null
     }
@@ -90,21 +123,27 @@ PanelWindow {
   }
   onAutohideChanged: shown = !autohide || wantShown
 
-  screen: modelData
+  screen: modelData.screen
   color: "transparent"
-  anchors { left: true; right: true; bottom: true }
-  implicitHeight: overlaySpace + panelHeight + edgeGap
+  anchors {
+    left: win.position !== "right"
+    right: win.position !== "left"
+    top: win.vertical
+    bottom: true
+  }
+  implicitWidth: overlaySpace + edgeSpace
+  implicitHeight: overlaySpace + edgeSpace
   exclusionMode: autohide ? ExclusionMode.Ignore : ExclusionMode.Normal
-  exclusiveZone: autohide ? 0 : panelHeight + edgeGap
+  exclusiveZone: autohide ? 0 : edgeSpace
   WlrLayershell.namespace: "omarchy-dock"
   WlrLayershell.layer: WlrLayer.Top
   WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
 
   mask: Region {
-    x: win.shown ? panel.x : Math.round((win.width - Math.max(panel.width, 480)) / 2)
-    y: win.shown ? win.overlaySpace : win.height - win.revealStrip
-    width: win.shown ? panel.width : Math.max(panel.width, 480)
-    height: win.shown ? win.height - win.overlaySpace : win.revealStrip
+    x: win.inputRect.x
+    y: win.inputRect.y
+    width: win.inputRect.width
+    height: win.inputRect.height
 
     Region {
       x: menu.x
@@ -142,20 +181,28 @@ PanelWindow {
     Rectangle {
       id: panel
 
-      readonly property real restY: win.overlaySpace
-      readonly property real hiddenY: win.height + 4
+      readonly property real restX: win.position === "left" ? win.edgeGap
+        : win.position === "right" ? content.width - win.edgeSpace
+        : Math.round((content.width - width) / 2)
+      readonly property real restY: win.vertical ? Math.round((content.height - height) / 2) : win.overlaySpace
+      readonly property real hiddenX: win.position === "left" ? -(win.panelThickness + 4)
+        : win.position === "right" ? content.width + 4
+        : restX
+      readonly property real hiddenY: win.vertical ? restY : content.height + 4
 
-      x: Math.round((parent.width - width) / 2)
+      x: win.shown ? restX : hiddenX
       y: win.shown ? restY : hiddenY
-      width: row.implicitWidth + win.panelPadding * 2
-      height: win.panelHeight
+      width: win.vertical ? win.panelThickness : grid.implicitWidth + win.panelPadding * 2
+      height: win.vertical ? grid.implicitHeight + win.panelPadding * 2 : win.panelThickness
       radius: Style.cornerRadius
       color: Color.bar.background
       border.width: win.borderWidth
       border.color: Color.popups.border
 
-      Behavior on y { NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-      Behavior on width { NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+      Behavior on x { enabled: win.vertical; NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+      Behavior on y { enabled: !win.vertical; NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
+      Behavior on width { enabled: !win.vertical; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+      Behavior on height { enabled: win.vertical; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
 
       MouseArea {
         anchors.fill: parent
@@ -163,9 +210,10 @@ PanelWindow {
         onClicked: win.openMenu(null, win.backgroundMenu())
       }
 
-      Row {
-        id: row
+      Grid {
+        id: grid
         anchors.centerIn: parent
+        columns: win.vertical ? 1 : Math.max(1, win.dock.appKeys.length)
         spacing: win.itemSpacing
 
         Repeater {
@@ -183,12 +231,14 @@ PanelWindow {
         readonly property var source: win.dragItem
         readonly property bool active: source !== null && source.dropIndex >= 0 && source.dropIndex !== source.pinnedIndex
         readonly property int slot: !active ? 0 : source.dropIndex > source.pinnedIndex ? source.dropIndex + 1 : source.dropIndex
+        readonly property real along: slot * win.slotSize - Math.round(win.itemSpacing / 2) - 1
+        readonly property real across: win.itemPadding + (win.position === "left" ? win.indicatorSpace : 0)
 
         visible: active
-        x: row.x + slot * win.slotSize - Math.round(win.itemSpacing / 2) - 1
-        y: row.y + win.itemPadding
-        width: 2
-        height: win.iconSize
+        x: grid.x + (win.vertical ? across : along)
+        y: grid.y + (win.vertical ? along : across)
+        width: win.vertical ? win.iconSize : 2
+        height: win.vertical ? 2 : win.iconSize
         radius: 1
         color: Color.accent
       }
@@ -201,8 +251,8 @@ PanelWindow {
 
       visible: opacity > 0
       opacity: active ? 1 : 0
-      x: Math.max(4, Math.min(content.width - width - 4, Math.round(win.tooltipCenter - width / 2)))
-      y: panel.restY - height - 8
+      x: win.popupX(width, win.tooltipCenter)
+      y: win.popupY(height, win.tooltipCenter)
       width: Math.min(360, tooltipText.implicitWidth + 20)
       height: tooltipText.implicitHeight + 10
       radius: Style.cornerRadius
@@ -229,21 +279,24 @@ PanelWindow {
       id: preview
 
       readonly property int count: win.previewWindows.length
-      readonly property int cardWidth: Math.max(120, Math.min(240, Math.floor((content.width - 32) / Math.max(1, count)) - 8))
+      readonly property int cardWidth: win.vertical
+        ? Math.max(120, Math.min(220, Math.floor(((content.height - 32) / Math.max(1, count) - 48) / 0.6)))
+        : Math.max(120, Math.min(240, Math.floor((content.width - 32) / Math.max(1, count)) - 8))
 
       visible: win.previewOpen
-      x: Math.max(4, Math.min(content.width - width - 4, Math.round(win.previewCenter - width / 2)))
-      y: panel.restY - height - 8
-      width: previewRow.implicitWidth + 16
-      height: previewRow.implicitHeight + 16
+      x: win.popupX(width, win.previewCenter)
+      y: win.popupY(height, win.previewCenter)
+      width: previewGrid.implicitWidth + 16
+      height: previewGrid.implicitHeight + 16
       radius: Style.cornerRadius
       color: Color.popups.background
       border.width: win.borderWidth
       border.color: Color.popups.border
 
-      Row {
-        id: previewRow
+      Grid {
+        id: previewGrid
         anchors.centerIn: parent
+        columns: win.vertical ? 1 : Math.max(1, preview.count)
         spacing: 8
 
         Repeater {
@@ -270,8 +323,8 @@ PanelWindow {
       id: menu
 
       visible: win.menuOpen
-      x: Math.max(4, Math.min(content.width - width - 4, Math.round(win.menuCenter - width / 2)))
-      y: panel.restY - height - 8
+      x: win.popupX(width, win.menuCenter)
+      y: win.popupY(height, win.menuCenter)
       width: menuColumn.implicitWidth + 8
       height: menuColumn.implicitHeight + 8
       radius: Style.cornerRadius

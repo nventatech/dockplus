@@ -11,10 +11,15 @@ PanelWindow {
 
   readonly property var config: dock.config
   readonly property int borderWidth: Math.max(1, Style.space(2))
+  readonly property var positionChoices: [
+    { value: "bottom", label: dock.tr("positionBottom") },
+    { value: "left", label: dock.tr("positionLeft") },
+    { value: "right", label: dock.tr("positionRight") }
+  ]
   readonly property var monitorChoices: {
-    var choices = [{ name: "", label: dock.tr("allMonitors") }]
+    var choices = [{ value: "", label: dock.tr("allMonitors") }]
     var screens = Quickshell.screens
-    for (var i = 0; i < screens.length; i++) choices.push({ name: screens[i].name, label: screens[i].name })
+    for (var i = 0; i < screens.length; i++) choices.push({ value: screens[i].name, label: screens[i].name })
     return choices
   }
 
@@ -196,50 +201,36 @@ PanelWindow {
         spacing: 10
 
         Text {
+          text: win.dock.tr("position")
+          color: Color.popups.text
+          font.family: Style.fontFamily
+          font.pixelSize: Style.fontPx(1)
+        }
+
+        ChoiceChips {
+          width: parent.width
+          options: win.positionChoices
+          current: win.config.position
+          onChosen: function(value) { win.config.setPosition(value) }
+        }
+      }
+
+      Column {
+        width: parent.width
+        spacing: 10
+
+        Text {
           text: win.dock.tr("monitor")
           color: Color.popups.text
           font.family: Style.fontFamily
           font.pixelSize: Style.fontPx(1)
         }
 
-        Flow {
+        ChoiceChips {
           width: parent.width
-          spacing: 8
-
-          Repeater {
-            model: win.monitorChoices.length
-
-            Rectangle {
-              id: choice
-              required property int index
-              readonly property var option: win.monitorChoices[index]
-              readonly property bool selected: win.config.monitor === option.name
-
-              width: choiceLabel.implicitWidth + 24
-              height: choiceLabel.implicitHeight + 14
-              radius: Style.cornerRadius
-              color: selected ? Util.alpha(Color.accent, 0.22)
-                : choiceMouse.containsMouse ? Util.alpha(Color.popups.text, 0.08) : "transparent"
-              border.width: 1
-              border.color: selected ? Color.accent : Util.alpha(Color.popups.text, 0.3)
-
-              Text {
-                id: choiceLabel
-                anchors.centerIn: parent
-                text: choice.option.label
-                color: Color.popups.text
-                font.family: Style.fontFamily
-                font.pixelSize: Style.fontPx(1)
-              }
-
-              MouseArea {
-                id: choiceMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: win.config.setMonitor(choice.option.name)
-              }
-            }
-          }
+          options: win.monitorChoices
+          current: win.config.monitor
+          onChosen: function(value) { win.config.setMonitor(value) }
         }
       }
 

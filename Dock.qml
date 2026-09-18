@@ -228,6 +228,7 @@ Item {
     function pin(appId: string): void { root.pinApp(appId) }
     function unpin(appId: string): void { root.unpinApp(appId) }
     function move(appId: string, index: int): void { root.movePinnedApp(appId, index) }
+    function position(value: string): void { root.config.setPosition(value) }
   }
 
   Connections {
@@ -281,7 +282,11 @@ Item {
   Component.onCompleted: clientsQuery.running = true
 
   Variants {
-    model: Quickshell.screens.filter(function(screen) { return root.screenEnabled(screen) })
+    model: {
+      var position = root.config.position
+      return Quickshell.screens.filter(function(screen) { return root.screenEnabled(screen) })
+        .map(function(screen) { return { screen: screen, position: position } })
+    }
     DockWindow { dock: root }
   }
 

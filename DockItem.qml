@@ -58,7 +58,7 @@ Item {
   }
 
   function updateDrop() {
-    var center = pinnedIndex * host.slotSize + width / 2 + body.x
+    var center = pinnedIndex * host.slotSize + host.slotSize / 2 + (host.vertical ? body.y : body.x)
     dropIndex = Math.max(0, Math.min(dock.config.pinned.length - 1, Math.floor(center / host.slotSize)))
   }
 
@@ -73,13 +73,14 @@ Item {
     var key = appKey
     var target = dropIndex
     body.x = 0
+    body.y = 0
     dropIndex = -1
     host.dragItem = null
     if (target >= 0) config.movePinned(key, target)
   }
 
-  width: host.iconSize + host.itemPadding * 2
-  height: host.iconSize + host.itemPadding * 2 + host.indicatorSpace
+  width: host.iconSize + host.itemPadding * 2 + (host.vertical ? host.indicatorSpace : 0)
+  height: host.iconSize + host.itemPadding * 2 + (host.vertical ? 0 : host.indicatorSpace)
   z: dragging ? 10 : 0
 
   Item {
@@ -88,6 +89,7 @@ Item {
     height: parent.height
     scale: item.dragging ? 1.06 : 1
     onXChanged: if (item.dragging) item.updateDrop()
+    onYChanged: if (item.dragging) item.updateDrop()
 
     Rectangle {
       anchors.fill: parent
@@ -97,7 +99,7 @@ Item {
     }
 
     Image {
-      x: item.host.itemPadding
+      x: item.host.itemPadding + (item.host.position === "left" ? item.host.indicatorSpace : 0)
       y: item.host.itemPadding
       width: item.host.iconSize
       height: item.host.iconSize
@@ -111,21 +113,24 @@ Item {
       Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
     }
 
-    Row {
-      anchors.horizontalCenter: parent.horizontalCenter
-      anchors.bottom: parent.bottom
-      anchors.bottomMargin: 1
-      height: 4
+    Grid {
+      x: !item.host.vertical ? Math.round((parent.width - width) / 2)
+        : item.host.position === "left" ? 1 : parent.width - width - 1
+      y: item.host.vertical ? Math.round((parent.height - height) / 2) : parent.height - height - 1
+      columns: item.host.vertical ? 1 : 3
       spacing: 3
+      horizontalItemAlignment: Grid.AlignHCenter
+      verticalItemAlignment: Grid.AlignVCenter
 
       Repeater {
         model: item.indicators
         Rectangle {
           required property string modelData
-          anchors.verticalCenter: parent.verticalCenter
-          width: modelData === "focused" ? Math.round(item.host.iconSize * 0.34) : modelData === "minimized" ? 7 : 4
-          height: modelData === "minimized" ? 2 : 4
-          radius: height / 2
+          readonly property int along: modelData === "focused" ? Math.round(item.host.iconSize * 0.34) : modelData === "minimized" ? 7 : 4
+          readonly property int across: modelData === "minimized" ? 2 : 4
+          width: item.host.vertical ? across : along
+          height: item.host.vertical ? along : across
+          radius: across / 2
           color: modelData === "focused" ? Color.accent
             : Util.alpha(Color.bar.text, modelData === "minimized" ? 0.45 : 0.7)
         }
@@ -139,9 +144,11 @@ Item {
     hoverEnabled: true
     acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
     drag.target: item.pinned ? body : null
-    drag.axis: Drag.XAxis
+    drag.axis: item.host.vertical ? Drag.YAxis : Drag.XAxis
     drag.minimumX: -item.pinnedIndex * item.host.slotSize
     drag.maximumX: (item.dock.config.pinned.length - 1 - item.pinnedIndex) * item.host.slotSize
+    drag.minimumY: drag.minimumX
+    drag.maximumY: drag.maximumX
     onPressed: item.wasDragged = false
     onContainsMouseChanged: item.host.setHovered(item, containsMouse)
     onClicked: function(event) {

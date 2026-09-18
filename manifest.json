@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "nventatech.dock",
   "name": "Dock",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "nventatech",
   "description": "Dash to Dock style dock with pinned apps, running apps and minimized windows.",
   "kinds": [
