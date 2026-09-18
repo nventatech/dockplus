@@ -12,6 +12,7 @@ Item {
   property bool wasDragged: false
   property real lastWheel: 0
   property bool acceptsDrops: false
+  property bool activatesOnDrag: false
 
   default property alias content: body.data
 
@@ -25,6 +26,7 @@ Item {
   signal clicked(int button)
   signal scrolled(int step)
   signal filesDropped(var urls)
+  signal dragHeld()
 
   function updateDrop() {
     var center = renderedIndex * host.slotSize + host.slotSize / 2 + (host.vertical ? body.y : body.x)
@@ -71,17 +73,34 @@ Item {
   DropArea {
     id: drop
     anchors.fill: parent
-    enabled: slot.acceptsDrops
+    enabled: slot.acceptsDrops || slot.activatesOnDrag
     keys: ["text/uri-list"]
-    onEntered: slot.host.fileDragEnter()
-    onExited: slot.host.fileDragLeave()
+    onEntered: {
+      slot.host.fileDragEnter()
+      if (slot.activatesOnDrag) dragHoldTimer.restart()
+    }
+    onExited: {
+      dragHoldTimer.stop()
+      slot.host.fileDragLeave()
+    }
     onDropped: function(event) {
+      dragHoldTimer.stop()
+      if (!slot.acceptsDrops) {
+        slot.host.fileDragDone()
+        return
+      }
       var urls = []
       for (var i = 0; i < event.urls.length; i++) urls.push(String(event.urls[i]))
       event.acceptProposedAction()
       slot.host.fileDragDone()
       if (urls.length > 0) slot.filesDropped(urls)
     }
+  }
+
+  Timer {
+    id: dragHoldTimer
+    interval: 700
+    onTriggered: if (drop.containsDrag) slot.dragHeld()
   }
 
   Rectangle {

@@ -49,6 +49,8 @@ PanelWindow {
   property var menuEntries: []
   property real menuCenter: 0
   property string previewKey: ""
+  property bool previewByHover: false
+  property var hoverCandidate: null
   property real previewCenter: 0
   readonly property bool previewOpen: previewKey !== ""
   readonly property var scope: dock.scopeFor(hyprMonitor)
@@ -109,13 +111,47 @@ PanelWindow {
 
   function togglePreview(item) {
     menuOpen = false
+    previewCloseTimer.stop()
     if (previewKey === item.appKey) {
-      previewKey = ""
+      if (previewByHover) previewByHover = false
+      else previewKey = ""
       return
     }
     previewCenter = mainCenter(item)
     previewKey = item.appKey
+    previewByHover = false
   }
+
+  function openHoverPreview(item) {
+    if (menuOpen || previewKey === item.appKey) return
+    previewCenter = mainCenter(item)
+    previewKey = item.appKey
+    previewByHover = true
+  }
+
+  function dismissHoverPreview() {
+    previewOpenTimer.stop()
+    previewCloseTimer.stop()
+    if (previewByHover) previewKey = ""
+  }
+
+  function hoverTargetsPreview(item) {
+    return !!item && item.windows !== undefined && item.windows.length > 0
+  }
+
+  onHoveredItemChanged: {
+    if (!dock.config.previewOnHover || dragItem !== null) return
+    if (hoverTargetsPreview(hoveredItem)) {
+      hoverCandidate = hoveredItem
+      previewCloseTimer.stop()
+      previewOpenTimer.restart()
+    } else {
+      previewOpenTimer.stop()
+      if (previewByHover) previewCloseTimer.restart()
+    }
+  }
+
+  onPreviewKeyChanged: if (previewKey === "") previewByHover = false
 
   function openMenu(item, entries) {
     previewKey = ""
@@ -232,6 +268,22 @@ PanelWindow {
     }
   }
 
+  Timer {
+    id: previewOpenTimer
+    interval: 500
+    onTriggered: if (win.hoverCandidate && win.hoveredItem === win.hoverCandidate) win.openHoverPreview(win.hoverCandidate)
+  }
+
+  Timer {
+    id: previewCloseTimer
+    interval: 400
+    onTriggered: {
+      if (!win.previewByHover || previewHover.hovered) return
+      if (win.hoveredItem && win.hoveredItem.appKey === win.previewKey) return
+      win.previewKey = ""
+    }
+  }
+
   Timer { id: fileDragTimer; interval: 400; onTriggered: win.fileDragActive = false }
   Timer { id: numbersTimer; interval: 1500; onTriggered: win.numbersVisible = false }
   Timer { id: urgentTimer; interval: 3000; onTriggered: win.urgentReveal = false }
@@ -240,7 +292,7 @@ PanelWindow {
 
   HyprlandFocusGrab {
     windows: [win]
-    active: win.menuOpen || win.previewOpen
+    active: win.menuOpen || (win.previewOpen && !win.previewByHover)
     onCleared: {
       win.menuOpen = false
       win.previewKey = ""
@@ -365,6 +417,14 @@ PanelWindow {
 
     Rectangle {
       id: preview
+
+      HoverHandler {
+        id: previewHover
+        onHoveredChanged: {
+          if (hovered) previewCloseTimer.stop()
+          else if (win.previewByHover) previewCloseTimer.restart()
+        }
+      }
 
       readonly property int count: win.previewWindows.length
       readonly property int cardWidth: win.vertical

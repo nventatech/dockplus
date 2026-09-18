@@ -13,9 +13,10 @@ omarchy plugin add <repo-url> --enable
 - Click: by default, launch the app, focus its window, or minimize it when it is already focused. With two or more windows, a panel with live previews opens. Settings can switch this to cycling windows or always opening a new window.
 - Middle click: open a new window.
 - Scroll on an icon: cycle through the app's open windows.
+- Optional previews on hover: rest the pointer on an app to see its windows; clicking the icon keeps the panel open.
 - Right click: the app's own actions (such as Steam Library or a Brave incognito window), then pin, unpin, minimize, close or dock settings.
 - Drag any icon along the dock to reorder it: apps, drives, trash and the applications button. Dragging a running app that is not pinned pins it where you drop it.
-- Drop files on an app to open them with it, on a drive to copy them there, or on the trash to delete them.
+- Drop files on an app to open them with it, on a drive to copy them there, or on the trash to delete them. Holding a dragged file over an app for a moment brings its window up so you can drop inside it.
 - An icon bounces while its app is starting and wiggles when a window asks for attention.
 - Applications button: opens the Omarchy apps menu.
 - Trash: shows the item count; click opens it, right click empties it after a second confirming click.
@@ -44,5 +45,5 @@ Other commands: `omarchy-shell dock settings`, `pin <appId>`, `unpin <appId>`, `
 Stored in `~/.config/omarchy-dock/config.json`:
 
 - Appearance: `iconSize` (24 to 96), `backgroundOpacity` (40 to 100), `position` (`bottom`, `left`, `right`), `monitor` (empty for all, or an output name such as `DP-1`), `indicatorStyle` (`default`, `dots`, `dashes`, `segments`), `panelMode`.
-- Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `superNumbers`, `isolateMonitors`, `isolateWorkspaces`, `showAppsButton`, `showTrash`, `showDrives`.
+- Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `previewOnHover`, `superNumbers`, `isolateMonitors`, `isolateWorkspaces`, `showPinned`, `showAppsButton`, `showTrash`, `showDrives`.
 - `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.

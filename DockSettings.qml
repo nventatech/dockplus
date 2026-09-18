@@ -289,6 +289,14 @@ PanelWindow {
 
         ToggleRow {
           width: parent.width
+          label: win.dock.tr("previewOnHover")
+          hint: win.dock.tr("previewOnHoverHint")
+          checked: win.config.previewOnHover
+          onToggled: function(value) { win.config.setPreviewOnHover(value) }
+        }
+
+        ToggleRow {
+          width: parent.width
           label: win.dock.tr("superNumbers")
           hint: win.dock.tr("superNumbersHint")
           checked: win.config.superNumbers

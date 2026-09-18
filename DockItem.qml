@@ -59,6 +59,7 @@ DockSlot {
 
   function leftClick() {
     var mode = dock.config.clickAction
+    if (!(mode === "smart" && windows.length > 1)) host.dismissHoverPreview()
     if (mode === "launch" && entry) dock.newWindow(appKey)
     else if (mode === "cycle") dock.cycleClick(appKey, host.scope)
     else if (windows.length > 1) host.togglePreview(item)
@@ -66,6 +67,17 @@ DockSlot {
   }
 
   label: entry ? entry.name : (windows.length > 0 && windows[0].title ? windows[0].title : appId)
+
+  onDragHeld: {
+    var target = openWindows.length > 0 ? openWindows[0] : windows[0]
+    if (!target) {
+      var elsewhere = dock.windowsOf(appKey)
+      target = elsewhere.length > 0 ? elsewhere[0] : null
+    }
+    if (target) dock.activateWindow(target)
+  }
+
+  activatesOnDrag: true
 
   onScrolled: function(step) { dock.cycleWindows(appKey, step, host.scope) }
 
