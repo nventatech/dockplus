@@ -282,6 +282,7 @@ PanelWindow {
           width: parent.width
           label: win.dock.tr("clickAction")
           options: win.clickChoices
+          stacked: true
           current: win.config.clickAction
           onChosen: function(value) { win.config.setClickAction(value) }
         }

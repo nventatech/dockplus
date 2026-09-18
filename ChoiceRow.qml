@@ -7,6 +7,7 @@ Column {
   property string label: ""
   property var options: []
   property string current: ""
+  property bool stacked: false
 
   signal chosen(string value)
 
@@ -23,6 +24,7 @@ Column {
     width: parent.width
     options: row.options
     current: row.current
+    stacked: row.stacked
     onChosen: function(value) { row.chosen(value) }
   }
 }

@@ -6,6 +6,7 @@ Flow {
 
   property var options: []
   property string current: ""
+  property bool stacked: false
 
   signal chosen(string value)
 
@@ -20,7 +21,7 @@ Flow {
       readonly property var option: chips.options[index]
       readonly property bool selected: chips.current === option.value
 
-      width: chipLabel.implicitWidth + 24
+      width: chips.stacked ? chips.width : chipLabel.implicitWidth + 24
       height: chipLabel.implicitHeight + 14
       radius: Style.cornerRadius
       color: selected ? Util.alpha(Color.accent, 0.22)
@@ -30,7 +31,8 @@ Flow {
 
       Text {
         id: chipLabel
-        anchors.centerIn: parent
+        x: chips.stacked ? 12 : Math.round((parent.width - width) / 2)
+        anchors.verticalCenter: parent.verticalCenter
         text: chip.option.label
         color: Color.popups.text
         font.family: Style.fontFamily
