@@ -98,9 +98,9 @@ DockSlot {
     smooth: true
     opacity: item.allMinimized ? 0.5 : 1
     rotation: item.wiggle
-    scale: item.pressed ? 0.9 : item.hovered ? 1.1 : 1
-    Behavior on opacity { NumberAnimation { duration: 140 } }
-    Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+    scale: item.iconScale
+    Behavior on opacity { NumberAnimation { duration: item.host.duration(140) } }
+    Behavior on scale { NumberAnimation { duration: item.host.duration(110); easing.type: Easing.OutCubic } }
 
     transform: Translate {
       x: item.host.position === "left" ? item.bounce : item.host.position === "right" ? -item.bounce : 0
@@ -109,23 +109,23 @@ DockSlot {
   }
 
   SequentialAnimation {
-    running: item.launching
+    running: item.launching && item.dock.config.animations && item.dock.config.launchBounce
     loops: Animation.Infinite
     onRunningChanged: if (!running) item.bounce = 0
-    NumberAnimation { target: item; property: "bounce"; to: item.host.iconSize * 0.25; duration: 260; easing.type: Easing.OutQuad }
-    NumberAnimation { target: item; property: "bounce"; to: 0; duration: 260; easing.type: Easing.InQuad }
-    PauseAnimation { duration: 180 }
+    NumberAnimation { target: item; property: "bounce"; to: item.host.iconSize * 0.25; duration: item.host.duration(260); easing.type: Easing.OutQuad }
+    NumberAnimation { target: item; property: "bounce"; to: 0; duration: item.host.duration(260); easing.type: Easing.InQuad }
+    PauseAnimation { duration: item.host.duration(180) }
   }
 
   SequentialAnimation {
-    running: item.urgent
+    running: item.urgent && item.dock.config.animations && item.dock.config.urgentWiggle
     loops: Animation.Infinite
     onRunningChanged: if (!running) item.wiggle = 0
-    NumberAnimation { target: item; property: "wiggle"; to: -12; duration: 70 }
-    NumberAnimation { target: item; property: "wiggle"; to: 12; duration: 120 }
-    NumberAnimation { target: item; property: "wiggle"; to: -8; duration: 110 }
-    NumberAnimation { target: item; property: "wiggle"; to: 8; duration: 100 }
-    NumberAnimation { target: item; property: "wiggle"; to: 0; duration: 80 }
+    NumberAnimation { target: item; property: "wiggle"; to: -12; duration: item.host.duration(70) }
+    NumberAnimation { target: item; property: "wiggle"; to: 12; duration: item.host.duration(120) }
+    NumberAnimation { target: item; property: "wiggle"; to: -8; duration: item.host.duration(110) }
+    NumberAnimation { target: item; property: "wiggle"; to: 8; duration: item.host.duration(100) }
+    NumberAnimation { target: item; property: "wiggle"; to: 0; duration: item.host.duration(80) }
     PauseAnimation { duration: 1400 }
   }
 

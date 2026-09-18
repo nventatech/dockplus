@@ -26,6 +26,15 @@ Item {
   readonly property string indicatorStyle: indicatorStyles.indexOf(adapter.indicatorStyle) !== -1 ? adapter.indicatorStyle : "default"
   readonly property int backgroundOpacity: Math.max(minOpacity, Math.min(100, adapter.backgroundOpacity))
   readonly property bool panelMode: adapter.panelMode
+  readonly property bool animations: adapter.animations
+  readonly property int animationSpeed: Math.max(50, Math.min(200, adapter.animationSpeed))
+  readonly property int hoverZoom: Math.max(0, Math.min(30, adapter.hoverZoom))
+  readonly property bool launchBounce: adapter.launchBounce
+  readonly property bool urgentWiggle: adapter.urgentWiggle
+  readonly property var revealStyles: ["slide", "fade", "none"]
+  readonly property string revealStyle: revealStyles.indexOf(adapter.revealStyle) !== -1 ? adapter.revealStyle : "slide"
+  readonly property int showDelay: Math.max(0, Math.min(500, adapter.showDelay))
+  readonly property int hideDelay: Math.max(200, Math.min(2000, adapter.hideDelay))
   readonly property bool isolateMonitors: adapter.isolateMonitors
   readonly property bool superNumbers: adapter.superNumbers
   readonly property bool previewOnHover: adapter.previewOnHover
@@ -60,6 +69,14 @@ Item {
   function setPanelMode(value) { adapter.panelMode = value === true }
   function setPreviewOnHover(value) { adapter.previewOnHover = value === true }
   function setSuperNumbers(value) { adapter.superNumbers = value === true }
+  function setAnimations(value) { adapter.animations = value === true }
+  function setAnimationSpeed(value) { adapter.animationSpeed = Math.max(50, Math.min(200, Math.round(value))) }
+  function setHoverZoom(value) { adapter.hoverZoom = Math.max(0, Math.min(30, Math.round(value))) }
+  function setLaunchBounce(value) { adapter.launchBounce = value === true }
+  function setUrgentWiggle(value) { adapter.urgentWiggle = value === true }
+  function setRevealStyle(value) { if (revealStyles.indexOf(value) !== -1) adapter.revealStyle = value }
+  function setShowDelay(value) { adapter.showDelay = Math.max(0, Math.min(500, Math.round(value))) }
+  function setHideDelay(value) { adapter.hideDelay = Math.max(200, Math.min(2000, Math.round(value))) }
   function setIsolateMonitors(value) { adapter.isolateMonitors = value === true }
   function setIsolateWorkspaces(value) { adapter.isolateWorkspaces = value === true }
   function setClickAction(value) { if (clickActions.indexOf(value) !== -1) adapter.clickAction = value }
@@ -115,6 +132,14 @@ Item {
       property bool showPinned: true
       property string clickAction: "smart"
       property bool isolateMonitors: false
+      property bool animations: true
+      property int animationSpeed: 100
+      property int hoverZoom: 10
+      property bool launchBounce: true
+      property bool urgentWiggle: true
+      property string revealStyle: "slide"
+      property int showDelay: 120
+      property int hideDelay: 450
       property bool superNumbers: false
       property bool previewOnHover: false
       property string indicatorStyle: "default"

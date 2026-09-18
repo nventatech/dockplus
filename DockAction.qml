@@ -35,8 +35,8 @@ DockSlot {
     y: item.iconY
     width: item.host.iconSize
     height: item.host.iconSize
-    scale: item.pressed ? 0.9 : item.hovered ? 1.1 : 1
-    Behavior on scale { NumberAnimation { duration: 110; easing.type: Easing.OutCubic } }
+    scale: item.iconScale
+    Behavior on scale { NumberAnimation { duration: item.host.duration(110); easing.type: Easing.OutCubic } }
 
     Image {
       anchors.fill: parent

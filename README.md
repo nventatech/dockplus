@@ -18,6 +18,7 @@ omarchy plugin add <repo-url> --enable
 - Drag any icon along the dock to reorder it: apps, drives, trash and the applications button. Dragging a running app that is not pinned pins it where you drop it.
 - Drop files on an app to open them with it, on a drive to copy them there, or on the trash to delete them. Holding a dragged file over an app for a moment brings its window up so you can drop inside it.
 - An icon bounces while its app is starting and wiggles when a window asks for attention.
+- Animations: turn them off, change their speed (0.5x to 2x), pick how the dock enters (slide, fade or none), set the hover zoom and the autohide delays.
 - Applications button: opens the Omarchy apps menu.
 - Trash: shows the item count; click opens it, right click empties it after a second confirming click.
 - Removable drives: USB sticks and external disks appear while plugged in. Click mounts and opens; right click unmounts or safely removes the disk.
@@ -45,5 +46,6 @@ Other commands: `omarchy-shell dock settings`, `pin <appId>`, `unpin <appId>`, `
 Stored in `~/.config/omarchy-dock/config.json`:
 
 - Appearance: `iconSize` (24 to 96), `backgroundOpacity` (40 to 100), `position` (`bottom`, `left`, `right`), `monitor` (empty for all, or an output name such as `DP-1`), `indicatorStyle` (`default`, `dots`, `dashes`, `segments`), `panelMode`.
+- Animations: `animations`, `animationSpeed` (50 to 200), `revealStyle` (`slide`, `fade`, `none`), `hoverZoom` (0 to 30), `launchBounce`, `urgentWiggle`, `showDelay` (0 to 500 ms), `hideDelay` (200 to 2000 ms).
 - Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `previewOnHover`, `superNumbers`, `isolateMonitors`, `isolateWorkspaces`, `showPinned`, `showAppsButton`, `showTrash`, `showDrives`.
 - `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.

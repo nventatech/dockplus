@@ -21,6 +21,7 @@ Item {
   readonly property bool hovered: mouse.containsMouse
   readonly property real iconX: host.itemPadding + (host.position === "left" ? host.indicatorSpace : 0)
   readonly property real iconY: host.itemPadding
+  readonly property real iconScale: pressed ? 0.9 : hovered ? 1 + dock.config.hoverZoom / 100 : 1
   readonly property int lastIndex: host.entries.length - 1
 
   signal clicked(int button)
@@ -66,7 +67,7 @@ Item {
       radius: Style.cornerRadius
       color: drop.containsDrag ? Util.alpha(Color.accent, 0.3)
         : Util.alpha(Color.bar.text, slot.pressed ? 0.16 : slot.hovered ? 0.09 : 0)
-      Behavior on color { ColorAnimation { duration: 100 } }
+      Behavior on color { ColorAnimation { duration: slot.host.duration(100) } }
     }
   }
 

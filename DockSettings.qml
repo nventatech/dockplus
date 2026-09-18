@@ -18,6 +18,7 @@ PanelWindow {
     { key: "tabAppearance", glyph: String.fromCodePoint(0xF03D8) },
     { key: "tabPosition", glyph: String.fromCodePoint(0xF0379) },
     { key: "tabBehavior", glyph: String.fromCodePoint(0xF037D) },
+    { key: "tabAnimations", glyph: String.fromCodePoint(0xF05D8) },
     { key: "tabItems", glyph: String.fromCodePoint(0xF0570) }
   ]
   readonly property var positionChoices: [
@@ -35,6 +36,11 @@ PanelWindow {
     { value: "dots", label: dock.tr("indicatorDots") },
     { value: "dashes", label: dock.tr("indicatorDashes") },
     { value: "segments", label: dock.tr("indicatorSegments") }
+  ]
+  readonly property var revealChoices: [
+    { value: "slide", label: dock.tr("revealSlide") },
+    { value: "fade", label: dock.tr("revealFade") },
+    { value: "none", label: dock.tr("revealNone") }
   ]
   readonly property var monitorChoices: {
     var choices = [{ value: "", label: dock.tr("allMonitors") }]
@@ -194,7 +200,7 @@ PanelWindow {
       y: header.y + header.height + 18
       width: win.contentWidth
       height: Math.max(appearancePage.implicitHeight, positionPage.implicitHeight,
-        behaviorPage.implicitHeight, itemsPage.implicitHeight, tabColumn.implicitHeight - 6)
+        behaviorPage.implicitHeight, animationsPage.implicitHeight, itemsPage.implicitHeight, tabColumn.implicitHeight - 6)
 
       Column {
         id: appearancePage
@@ -305,8 +311,76 @@ PanelWindow {
       }
 
       Column {
-        id: itemsPage
+        id: animationsPage
         visible: win.tab === 3
+        width: parent.width
+        spacing: 22
+
+        ToggleRow {
+          width: parent.width
+          label: win.dock.tr("animations")
+          checked: win.config.animations
+          onToggled: function(value) { win.config.setAnimations(value) }
+        }
+
+        SliderRow {
+          width: parent.width
+          label: win.dock.tr("animationSpeed")
+          valueText: (win.config.animationSpeed / 100) + "x"
+          ratio: (win.config.animationSpeed - 50) / 150
+          onMoved: function(ratio) { win.config.setAnimationSpeed(Math.round((50 + ratio * 150) / 25) * 25) }
+        }
+
+        ChoiceRow {
+          width: parent.width
+          label: win.dock.tr("revealStyle")
+          options: win.revealChoices
+          current: win.config.revealStyle
+          onChosen: function(value) { win.config.setRevealStyle(value) }
+        }
+
+        SliderRow {
+          width: parent.width
+          label: win.dock.tr("hoverZoom")
+          valueText: win.config.hoverZoom + "%"
+          ratio: win.config.hoverZoom / 30
+          onMoved: function(ratio) { win.config.setHoverZoom(ratio * 30) }
+        }
+
+        ToggleRow {
+          width: parent.width
+          label: win.dock.tr("launchBounce")
+          checked: win.config.launchBounce
+          onToggled: function(value) { win.config.setLaunchBounce(value) }
+        }
+
+        ToggleRow {
+          width: parent.width
+          label: win.dock.tr("urgentWiggle")
+          checked: win.config.urgentWiggle
+          onToggled: function(value) { win.config.setUrgentWiggle(value) }
+        }
+
+        SliderRow {
+          width: parent.width
+          label: win.dock.tr("showDelay")
+          valueText: win.config.showDelay + " ms"
+          ratio: win.config.showDelay / 500
+          onMoved: function(ratio) { win.config.setShowDelay(Math.round(ratio * 500 / 10) * 10) }
+        }
+
+        SliderRow {
+          width: parent.width
+          label: win.dock.tr("hideDelay")
+          valueText: win.config.hideDelay + " ms"
+          ratio: (win.config.hideDelay - 200) / 1800
+          onMoved: function(ratio) { win.config.setHideDelay(Math.round((200 + ratio * 1800) / 50) * 50) }
+        }
+      }
+
+      Column {
+        id: itemsPage
+        visible: win.tab === 4
         width: parent.width
         spacing: 22
 

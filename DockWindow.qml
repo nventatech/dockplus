@@ -72,6 +72,10 @@ PanelWindow {
 
   onPreviewWindowsChanged: if (previewOpen && previewWindows.length === 0) previewKey = ""
 
+  function duration(ms) {
+    return dock.config.animations ? Math.round(ms * 100 / dock.config.animationSpeed) : 0
+  }
+
   function mainCenter(item) {
     var point = item.mapToItem(content, item.width / 2, item.height / 2)
     return vertical ? point.y : point.x
@@ -287,8 +291,8 @@ PanelWindow {
   Timer { id: fileDragTimer; interval: 400; onTriggered: win.fileDragActive = false }
   Timer { id: numbersTimer; interval: 1500; onTriggered: win.numbersVisible = false }
   Timer { id: urgentTimer; interval: 3000; onTriggered: win.urgentReveal = false }
-  Timer { id: showTimer; interval: 120; onTriggered: win.shown = true }
-  Timer { id: hideTimer; interval: 450; onTriggered: win.shown = win.wantShown }
+  Timer { id: showTimer; interval: win.dock.config.showDelay; onTriggered: win.shown = true }
+  Timer { id: hideTimer; interval: win.dock.config.hideDelay; onTriggered: win.shown = win.wantShown }
 
   HyprlandFocusGrab {
     windows: [win]
@@ -327,8 +331,11 @@ PanelWindow {
         : restX
       readonly property real hiddenY: win.vertical ? restY : content.height + 4
 
-      x: win.shown ? restX : hiddenX
-      y: win.shown ? restY : hiddenY
+      readonly property bool slides: win.dock.config.revealStyle === "slide"
+
+      x: win.shown || !slides ? restX : hiddenX
+      y: win.shown || !slides ? restY : hiddenY
+      opacity: win.shown || slides ? 1 : 0
       width: win.vertical ? win.panelThickness : win.panelMode ? content.width : grid.implicitWidth + win.panelPadding * 2
       height: !win.vertical ? win.panelThickness : win.panelMode ? content.height : grid.implicitHeight + win.panelPadding * 2
       radius: win.panelMode ? 0 : Style.cornerRadius
@@ -336,10 +343,11 @@ PanelWindow {
       border.width: win.borderWidth
       border.color: Color.popups.border
 
-      Behavior on x { enabled: win.vertical; NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-      Behavior on y { enabled: !win.vertical; NumberAnimation { duration: 180; easing.type: Easing.OutCubic } }
-      Behavior on width { enabled: !win.vertical; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
-      Behavior on height { enabled: win.vertical; NumberAnimation { duration: 140; easing.type: Easing.OutCubic } }
+      Behavior on x { enabled: win.vertical && panel.slides; NumberAnimation { duration: win.duration(180); easing.type: Easing.OutCubic } }
+      Behavior on y { enabled: !win.vertical && panel.slides; NumberAnimation { duration: win.duration(180); easing.type: Easing.OutCubic } }
+      Behavior on opacity { enabled: win.dock.config.revealStyle === "fade"; NumberAnimation { duration: win.duration(180) } }
+      Behavior on width { enabled: !win.vertical; NumberAnimation { duration: win.duration(140); easing.type: Easing.OutCubic } }
+      Behavior on height { enabled: win.vertical; NumberAnimation { duration: win.duration(140); easing.type: Easing.OutCubic } }
 
       MouseArea {
         anchors.fill: parent
@@ -400,7 +408,7 @@ PanelWindow {
       border.width: 1
       border.color: Util.alpha(Color.tooltip.border, 0.4)
 
-      Behavior on opacity { NumberAnimation { duration: 100 } }
+      Behavior on opacity { NumberAnimation { duration: win.duration(100) } }
 
       Text {
         id: tooltipText
