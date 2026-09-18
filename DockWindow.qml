@@ -45,7 +45,8 @@ PanelWindow {
   property string previewKey: ""
   property real previewCenter: 0
   readonly property bool previewOpen: previewKey !== ""
-  readonly property bool extrasVisible: dock.config.showAppsButton || dock.config.showTrash
+  readonly property var shownDrives: dock.config.showDrives ? dock.drives.drives : []
+  readonly property bool extrasVisible: dock.config.showAppsButton || dock.config.showTrash || shownDrives.length > 0
   readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey) : []
 
   readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
@@ -98,6 +99,14 @@ PanelWindow {
   function runMenuEntry(entry) {
     menuOpen = false
     if (entry && typeof entry.run === "function") entry.run()
+  }
+
+  function driveMenu(drive) {
+    var drives = dock.drives
+    var entries = [{ label: dock.tr("open"), run: function() { drives.open(drive) } }]
+    if (drive.mounted) entries.push({ label: dock.tr("unmount"), run: function() { drives.unmount(drive) } })
+    entries.push({ label: dock.tr("safelyRemove"), run: function() { drives.eject(drive) } })
+    return entries
   }
 
   function trashMenu() {
@@ -256,6 +265,20 @@ PanelWindow {
             width: win.vertical ? Math.round(win.iconSize * 0.6) : 1
             height: win.vertical ? 1 : Math.round(win.iconSize * 0.6)
             color: Util.alpha(Color.bar.text, 0.25)
+          }
+        }
+
+        Repeater {
+          model: ScriptModel { values: win.shownDrives }
+
+          DockAction {
+            required property var modelData
+            host: win
+            label: modelData.label || modelData.size
+            iconNames: ["drive-removable-media-usb", "drive-removable-media", "media-removable", "drive-harddisk"]
+            marked: modelData.mounted
+            onActivated: win.dock.drives.open(modelData)
+            menuBuilder: function() { return win.driveMenu(modelData) }
           }
         }
 

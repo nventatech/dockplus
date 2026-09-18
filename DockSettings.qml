@@ -203,6 +203,13 @@ PanelWindow {
         onToggled: function(value) { win.config.setShowTrash(value) }
       }
 
+      ToggleRow {
+        width: parent.width
+        label: win.dock.tr("showDrives")
+        checked: win.config.showDrives
+        onToggled: function(value) { win.config.setShowDrives(value) }
+      }
+
       Item {
         width: parent.width
         height: doneButton.height

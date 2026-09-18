@@ -19,6 +19,7 @@ Item {
   readonly property string position: positions.indexOf(adapter.position) !== -1 ? adapter.position : "bottom"
   readonly property bool showAppsButton: adapter.showAppsButton
   readonly property bool showTrash: adapter.showTrash
+  readonly property bool showDrives: adapter.showDrives
   readonly property var pinned: {
     var out = []
     for (var i = 0; i < adapter.pinned.length; i++) out.push(String(adapter.pinned[i]))
@@ -32,6 +33,7 @@ Item {
 
   function setShowAppsButton(value) { adapter.showAppsButton = value === true }
   function setShowTrash(value) { adapter.showTrash = value === true }
+  function setShowDrives(value) { adapter.showDrives = value === true }
 
   function isPinned(key) { return pinned.indexOf(key) !== -1 }
 
@@ -74,6 +76,7 @@ Item {
       property string position: "bottom"
       property bool showAppsButton: true
       property bool showTrash: true
+      property bool showDrives: true
       property list<string> pinned: []
     }
   }

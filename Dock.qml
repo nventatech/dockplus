@@ -14,6 +14,7 @@ Item {
   readonly property string lang: Qt.locale().name.indexOf("pt") === 0 ? "pt" : "en"
   property alias config: dockConfig
   property alias trash: dockTrash
+  property alias drives: dockDrives
   property var minimizeOrder: []
   property int entriesRevision: 0
 
@@ -227,6 +228,11 @@ Item {
   Trash {
     id: dockTrash
     active: dockConfig.showTrash
+  }
+
+  Drives {
+    id: dockDrives
+    active: dockConfig.showDrives
   }
 
   IpcHandler {
