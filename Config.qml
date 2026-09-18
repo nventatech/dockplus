@@ -26,6 +26,7 @@ Item {
   readonly property int backgroundOpacity: Math.max(minOpacity, Math.min(100, adapter.backgroundOpacity))
   readonly property bool panelMode: adapter.panelMode
   readonly property bool isolateMonitors: adapter.isolateMonitors
+  readonly property bool superNumbers: adapter.superNumbers
   readonly property bool isolateWorkspaces: adapter.isolateWorkspaces
   readonly property var clickActions: ["smart", "cycle", "launch"]
   readonly property string clickAction: clickActions.indexOf(adapter.clickAction) !== -1 ? adapter.clickAction : "smart"
@@ -54,6 +55,7 @@ Item {
   function setIndicatorStyle(value) { if (indicatorStyles.indexOf(value) !== -1) adapter.indicatorStyle = value }
   function setBackgroundOpacity(value) { adapter.backgroundOpacity = Math.max(minOpacity, Math.min(100, Math.round(value))) }
   function setPanelMode(value) { adapter.panelMode = value === true }
+  function setSuperNumbers(value) { adapter.superNumbers = value === true }
   function setIsolateMonitors(value) { adapter.isolateMonitors = value === true }
   function setIsolateWorkspaces(value) { adapter.isolateWorkspaces = value === true }
   function setClickAction(value) { if (clickActions.indexOf(value) !== -1) adapter.clickAction = value }
@@ -108,6 +110,7 @@ Item {
       property bool showDrives: true
       property string clickAction: "smart"
       property bool isolateMonitors: false
+      property bool superNumbers: false
       property string indicatorStyle: "default"
       property int backgroundOpacity: 100
       property bool panelMode: false

@@ -185,6 +185,14 @@ PanelWindow {
 
           ToggleRow {
             width: parent.width
+            label: win.dock.tr("superNumbers")
+            hint: win.dock.tr("superNumbersHint")
+            checked: win.config.superNumbers
+            onToggled: function(value) { win.config.setSuperNumbers(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
             label: win.dock.tr("isolateMonitors")
             hint: win.dock.tr("isolateHint")
             checked: win.config.isolateMonitors

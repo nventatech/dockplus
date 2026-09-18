@@ -23,6 +23,8 @@ Item {
   property var launching: ({})
   property int urgentSerial: 0
   property var restoring: ({})
+  property bool numberBindingsApplied: false
+  readonly property string numberScript: Qt.resolvedUrl("dock-number.sh").toString().replace("file://", "")
 
   property var clients: ({})
   readonly property var toplevels: Hyprland.toplevels.values.filter(function(toplevel) {
@@ -415,6 +417,23 @@ Item {
 
   function togglePicker() { picker.toggle() }
 
+  function applyNumberBindings() {
+    var lines = []
+    for (var n = 1; n <= 9; n++) {
+      var keys = "SUPER + code:" + (n + 9)
+      lines.push('hl.unbind("' + keys + '")')
+      lines.push('hl.bind("' + keys + '", hl.dsp.exec_cmd("' + numberScript + ' ' + n + '"), { description = "Dock item ' + n + '" })')
+    }
+    Quickshell.execDetached(["hyprctl", "eval", lines.join("\n")])
+    numberBindingsApplied = true
+  }
+
+  function releaseNumberBindings() {
+    if (!numberBindingsApplied) return
+    numberBindingsApplied = false
+    Quickshell.execDetached(["hyprctl", "reload"])
+  }
+
   function focusedDock() {
     var windows = docks.instances
     var focused = Hyprland.focusedMonitor
@@ -466,6 +485,14 @@ Item {
   }
 
   Connections {
+    target: dockConfig
+    function onSuperNumbersChanged() {
+      if (dockConfig.superNumbers) root.applyNumberBindings()
+      else root.releaseNumberBindings()
+    }
+  }
+
+  Connections {
     target: DesktopEntries
     function onApplicationsChanged() { root.entriesRevision++ }
   }
@@ -475,6 +502,8 @@ Item {
     function onRawEvent(event) {
       if (event.name === "movewindowv2" || event.name === "openwindow" || event.name === "closewindow") {
         root.refreshClients()
+      } else if (event.name === "configreloaded") {
+        if (root.config.superNumbers) root.applyNumberBindings()
       } else if (event.name === "urgent") {
         root.urgentSerial++
       } else if (event.name === "activewindowv2") {
