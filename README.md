@@ -1,51 +1,91 @@
-# Omarchy Dock
+# DockPlus
 
-A Dash to Dock style dock for the Omarchy shell. Shows pinned apps, running apps, minimized windows, removable drives, the trash and an applications button.
+[![Omarchy](https://img.shields.io/badge/Omarchy-Quattro-1f2335)](https://omarchy.org/)
+[![Version](https://img.shields.io/github/v/release/nventatech/dockplus?label=version&color=54a3d8)](https://github.com/nventatech/dockplus/releases)
+[![Quickshell](https://img.shields.io/badge/Quickshell-plugin-54a3d8)](https://quickshell.org/)
+[![License](https://img.shields.io/badge/license-GPL--3.0-green)](LICENSE)
 
-## Install
+A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so DockPlus adds one: minimized windows stay on their app icon and come back with a click.
+
+![DockPlus](preview.png)
+
+## ✨ Features
+
+- One icon per app: pinned apps, running apps and their minimized windows together.
+- Real minimize, including the minimize button of X11 apps such as Steam.
+- Live window previews on click or on hover, and a picker for every minimized window.
+- Right click menu with the app's own actions (Steam Library, a Brave incognito window).
+- Drag any icon to reorder it. Drop files on an app to open them, on a drive to copy them, or on the trash to delete them.
+- Trash, removable drives and an applications button, each one optional.
+- Bottom, left or right edge, autohide, panel mode, and it never covers a fullscreen game.
+- Scroll to cycle windows, a bounce while an app starts and a wiggle when a window asks for attention.
+- Settings window with tabs for appearance, position, behavior, animations and items.
+
+## 🖼 Screenshots
+
+| Previews | Minimized windows |
+| --- | --- |
+| ![Previews](screenshots/previews.png) | ![Picker](screenshots/picker.png) |
+
+| Settings | Animations |
+| --- | --- |
+| ![Settings](screenshots/settings-appearance.png) | ![Animations](screenshots/settings-animations.png) |
+
+| Behavior | Left edge |
+| --- | --- |
+| ![Behavior](screenshots/settings-behavior.png) | ![Left edge](screenshots/dock-left.png) |
+
+## 📋 Requirements
+
+Omarchy 4 (Quattro). Everything else ships with Omarchy: `python3` for the X11 minimize helper, `udisks2` and `gvfs` for drives and trash, `gtk-launch` and `uwsm` to start apps.
+
+## 📦 Install
 
 ```bash
-omarchy plugin add <repo-url> --enable
+omarchy plugin add https://github.com/nventatech/dockplus --enable
 ```
 
-## Use
+Right click any icon and pick **Dock settings** to change anything, or run `omarchy-shell dockplus settings`.
 
-- Click: by default, launch the app, focus its window, or minimize it when it is already focused. With two or more windows, a panel with live previews opens. Settings can switch this to cycling windows or always opening a new window.
-- Middle click: open a new window.
-- Scroll on an icon: cycle through the app's open windows.
-- Optional previews on hover: rest the pointer on an app to see its windows; clicking the icon keeps the panel open.
-- Right click: the app's own actions (such as Steam Library or a Brave incognito window), then pin, unpin, minimize, close or dock settings.
-- Drag any icon along the dock to reorder it: apps, drives, trash and the applications button. Dragging a running app that is not pinned pins it where you drop it.
-- Drop files on an app to open them with it, on a drive to copy them there, or on the trash to delete them. Holding a dragged file over an app for a moment brings its window up so you can drop inside it.
-- An icon bounces while its app is starting and wiggles when a window asks for attention.
-- Animations: turn them off, change their speed (0.5x to 2x), pick how the dock enters (slide, fade or none), set the hover zoom and the autohide delays.
-- Applications button: opens the Omarchy apps menu.
-- Trash: shows the item count; click opens it, right click empties it after a second confirming click.
-- Removable drives: USB sticks and external disks appear while plugged in. Click mounts and opens; right click unmounts or safely removes the disk.
-- Minimized windows stay on their app icon, dimmed. Click to restore to the current workspace. A minimized window that gets focus from elsewhere (a notification, an app activating itself) is restored the same way.
-- The minimize button of X11 apps (Steam, Wine apps) works: a small `python3` helper listens for the request on XWayland.
-- With autohide on, touch the screen edge where the dock sits to reveal it. It also shows on an empty workspace and never shows over a fullscreen window. On an edge shared with another monitor the pointer crosses over instead of stopping, so prefer an outer edge.
-- The picker (`omarchy-shell dock pick`) shows every minimized window as a live card. Arrows or Tab move, Enter restores, Delete closes the window, Esc leaves.
+## ⌨️ Keybindings
 
-## Keybindings
-
-Hyprland has no minimize, so the dock provides it. Add to `~/.config/hypr/bindings.lua`:
+Add to `~/.config/hypr/bindings.lua`:
 
 ```lua
-o.bind("SUPER + M", "Minimize window", "omarchy-shell dock minimize")
-o.bind("SUPER + SHIFT + M", "Restore last minimized window", "omarchy-shell dock restore")
-o.bind("SUPER + ALT + M", "Pick minimized window to restore", "omarchy-shell dock pick")
+o.bind("SUPER + M", "Minimize window", "omarchy-shell dockplus minimize")
+o.bind("SUPER + SHIFT + M", "Restore last minimized window", "omarchy-shell dockplus restore")
+o.bind("SUPER + ALT + M", "Pick minimized window to restore", "omarchy-shell dockplus pick")
 ```
 
-`omarchy-shell dock activate <N>` runs the Nth item of the dock on the focused monitor and shows numbers on the icons. The setting "Super + 1-9 opens dock items" binds it to `SUPER + 1..9` in place of the Omarchy workspace switch while it is on; turning it off reloads Hyprland to bring the workspace keys back. Before removing the plugin, turn it off or run `hyprctl reload`.
+The setting **Super + 1-9 opens dock items** binds `SUPER + 1..9` to the dock instead of the Omarchy workspace switch while it is on. It changes the running binds only, never your config files.
 
-Other commands: `omarchy-shell dock settings`, `pin <appId>`, `unpin <appId>`, `move <appId|@drives|@trash|@apps> <index>` and `position <bottom|left|right>`.
+Other commands: `omarchy-shell dockplus settings`, `activate <N>`, `pin <appId>`, `unpin <appId>`, `move <appId|@drives|@trash|@apps> <index>` and `position <bottom|left|right>`.
 
-## Settings
+## ⚙️ Configuration
 
-Stored in `~/.config/omarchy-dock/config.json`:
+Stored in `~/.config/dockplus/config.json` and edited by the settings window:
 
-- Appearance: `iconSize` (24 to 96), `backgroundOpacity` (40 to 100), `position` (`bottom`, `left`, `right`), `monitor` (empty for all, or an output name such as `DP-1`), `indicatorStyle` (`default`, `dots`, `dashes`, `segments`), `panelMode`.
-- Animations: `animations`, `animationSpeed` (50 to 200), `revealStyle` (`slide`, `fade`, `none`), `hoverZoom` (0 to 30), `launchBounce`, `urgentWiggle`, `showDelay` (0 to 500 ms), `hideDelay` (200 to 2000 ms).
-- Behavior: `autohide`, `clickAction` (`smart`, `cycle`, `launch`), `previewOnHover`, `superNumbers`, `isolateMonitors`, `isolateWorkspaces`, `showPinned`, `showAppsButton`, `showTrash`, `showDrives`.
+- Appearance: `iconSize`, `backgroundOpacity`, `indicatorStyle`, `panelMode`.
+- Position: `position`, `monitor`, `autohide`.
+- Behavior: `clickAction` (`smart`, `cycle`, `launch`), `previewOnHover`, `superNumbers`.
+- Animations: `animations`, `animationSpeed`, `revealStyle` (`slide`, `fade`, `none`), `hoverZoom`, `launchBounce`, `urgentWiggle`, `showDelay`, `hideDelay`.
+- Items: `showPinned`, `showAppsButton`, `showTrash`, `showDrives`, `isolateMonitors`, `isolateWorkspaces`.
 - `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.
+
+## 🗑 Remove
+
+1. Turn off **Super + 1-9 opens dock items** if you turned it on (or run `hyprctl reload` afterwards).
+2. Run `omarchy plugin remove io.github.nventatech.dockplus`.
+3. Delete `~/.config/dockplus` and any DockPlus lines you added to `bindings.lua`.
+
+## ❤️ Donate
+
+If DockPlus is useful to you, you can support it through PayPal:
+
+[![Donate — PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=SR28XBBCYSPHE&no_recurring=0&item_name=Help+me+buy+a+coffee.&currency_code=USD)
+
+<img src="assets/donate-qr.png" width="140" alt="PayPal donation QR code">
+
+## 📄 License
+
+[GPL-3.0](LICENSE)
