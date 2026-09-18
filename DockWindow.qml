@@ -48,7 +48,9 @@ PanelWindow {
   property string previewKey: ""
   property real previewCenter: 0
   readonly property bool previewOpen: previewKey !== ""
-  readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey) : []
+  readonly property var scope: dock.scopeFor(hyprMonitor)
+  readonly property var entries: dock.entriesFor(scope)
+  readonly property var previewWindows: previewOpen ? dock.windowsOf(previewKey, scope) : []
 
   readonly property real stripLength: Math.max(vertical ? panel.height : panel.width, 480)
   readonly property rect inputRect: {
@@ -267,7 +269,7 @@ PanelWindow {
         Repeater {
           model: ScriptModel {
             objectProp: "key"
-            values: win.dock.entries
+            values: win.entries
           }
 
           DockEntry {

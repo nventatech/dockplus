@@ -234,6 +234,21 @@ PanelWindow {
         onToggled: function(value) { win.config.setShowDrives(value) }
       }
 
+      ToggleRow {
+        width: parent.width
+        label: win.dock.tr("isolateMonitors")
+        hint: win.dock.tr("isolateHint")
+        checked: win.config.isolateMonitors
+        onToggled: function(value) { win.config.setIsolateMonitors(value) }
+      }
+
+      ToggleRow {
+        width: parent.width
+        label: win.dock.tr("isolateWorkspaces")
+        checked: win.config.isolateWorkspaces
+        onToggled: function(value) { win.config.setIsolateWorkspaces(value) }
+      }
+
       Item {
         width: parent.width
         height: doneButton.height

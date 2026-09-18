@@ -19,7 +19,7 @@ Item {
   readonly property bool hovered: mouse.containsMouse
   readonly property real iconX: host.itemPadding + (host.position === "left" ? host.indicatorSpace : 0)
   readonly property real iconY: host.itemPadding
-  readonly property int lastIndex: dock.entries.length - 1
+  readonly property int lastIndex: host.entries.length - 1
 
   signal clicked(int button)
   signal scrolled(int step)
@@ -43,7 +43,7 @@ Item {
     body.y = 0
     dropIndex = -1
     host.dragItem = null
-    if (target >= 0 && target !== from) owner.moveRendered(from, target)
+    if (target >= 0 && target !== from) owner.moveRendered(host.entries, from, target)
   }
 
   width: host.iconSize + host.itemPadding * 2 + (host.vertical ? host.indicatorSpace : 0)

@@ -29,10 +29,11 @@ Item {
     return root.clients["0x" + toplevel.address] !== undefined
   })
 
-  readonly property var entries: {
+  function entriesFor(scope) {
     var order = config.order
     var running = []
     for (var i = 0; i < toplevels.length; i++) {
+      if (!inScope(toplevels[i], scope)) continue
       var key = keyOf(toplevels[i])
       if (order.indexOf(key) === -1 && running.indexOf(key) === -1) running.push(key)
     }
@@ -137,9 +138,9 @@ Item {
     config.moveEntry(entry ? entry.id : name, index)
   }
 
-  function moveRendered(from, to) {
-    var dragged = entries[from]
-    var anchor = entries[to]
+  function moveRendered(list, from, to) {
+    var dragged = list[from]
+    var anchor = list[to]
     if (!dragged || !anchor || from === to) return
     var token = dragged.token || dragged.key
     var order = config.order.filter(function(other) { return other !== token })
@@ -172,12 +173,29 @@ Item {
     return workspaceNameOf(toplevel) === minimizedWorkspace
   }
 
-  function windowsOf(key) {
+  function scopeFor(monitor) {
+    if (!monitor || (!config.isolateMonitors && !config.isolateWorkspaces)) return null
+    return {
+      monitorId: config.isolateMonitors ? monitor.id : -1,
+      workspaceId: config.isolateWorkspaces && monitor.activeWorkspace ? monitor.activeWorkspace.id : 0
+    }
+  }
+
+  function inScope(toplevel, scope) {
+    if (!scope || isMinimized(toplevel)) return true
+    var client = clientOf(toplevel)
+    if (!client) return false
+    if (scope.monitorId >= 0 && client.monitor !== scope.monitorId) return false
+    if (scope.workspaceId !== 0 && (!client.workspace || client.workspace.id !== scope.workspaceId)) return false
+    return true
+  }
+
+  function windowsOf(key, scope) {
     var open = []
     var minimized = []
     for (var i = 0; i < toplevels.length; i++) {
       var toplevel = toplevels[i]
-      if (keyOf(toplevel) !== key) continue
+      if (keyOf(toplevel) !== key || !inScope(toplevel, scope)) continue
       if (isMinimized(toplevel)) minimized.push(toplevel)
       else open.push(toplevel)
     }
@@ -306,31 +324,37 @@ Item {
     if (changed) launching = next
   }
 
-  function activateApp(key) {
-    var windows = windowsOf(key)
+  function activateApp(key, scope) {
+    var windows = windowsOf(key, scope)
     if (windows.length === 0) {
-      launch(key)
+      var elsewhere = windowsOf(key)
+      if (elsewhere.length > 0) activateWindow(elsewhere[0])
+      else launch(key)
       return
     }
     if (windows[0].activated && !isMinimized(windows[0])) minimizeWindow(windows[0])
     else activateWindow(windows[0])
   }
 
-  function openWindowsOf(key) {
-    return windowsOf(key).filter(function(toplevel) { return !root.isMinimized(toplevel) })
+  function openWindowsOf(key, scope) {
+    return windowsOf(key, scope).filter(function(toplevel) { return !root.isMinimized(toplevel) })
   }
 
-  function cycleWindows(key, step) {
-    var open = openWindowsOf(key)
+  function cycleWindows(key, step, scope) {
+    var open = openWindowsOf(key, scope)
     var current = -1
     for (var i = 0; i < open.length; i++) if (open[i].activated) current = i
     var next = Logic.nextIndex(open.length, current, step)
     if (next >= 0 && next !== current) focusWindow(open[next])
   }
 
-  function cycleClick(key) {
-    var windows = windowsOf(key)
-    var open = openWindowsOf(key)
+  function cycleClick(key, scope) {
+    var windows = windowsOf(key, scope)
+    if (windows.length === 0 && windowsOf(key).length > 0) {
+      activateApp(key, scope)
+      return
+    }
+    var open = openWindowsOf(key, scope)
     var focused = -1
     for (var i = 0; i < open.length; i++) if (open[i].activated) focused = i
     var decision = Logic.cycleDecision(windows.length, open.length, focused)
@@ -338,7 +362,7 @@ Item {
     else if (decision === "restore") restoreWindow(windows[windows.length - 1])
     else if (decision === "focus") focusWindow(open[0])
     else if (decision === "minimize") minimizeWindow(open[0])
-    else cycleWindows(key, 1)
+    else cycleWindows(key, 1, scope)
   }
 
   function activateWindow(toplevel) {

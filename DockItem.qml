@@ -8,7 +8,7 @@ DockSlot {
   property string appKey: ""
 
   readonly property var entry: dock.entryFor(appKey)
-  readonly property var windows: dock.windowsOf(appKey)
+  readonly property var windows: dock.windowsOf(appKey, host.scope)
   readonly property var openWindows: windows.filter(function(window) { return !item.dock.isMinimized(window) })
   readonly property var minimizedWindows: windows.filter(function(window) { return item.dock.isMinimized(window) })
   readonly property bool focused: openWindows.some(function(window) { return window.activated })
@@ -60,14 +60,14 @@ DockSlot {
   function leftClick() {
     var mode = dock.config.clickAction
     if (mode === "launch" && entry) dock.launch(appKey)
-    else if (mode === "cycle") dock.cycleClick(appKey)
+    else if (mode === "cycle") dock.cycleClick(appKey, host.scope)
     else if (windows.length > 1) host.togglePreview(item)
-    else dock.activateApp(appKey)
+    else dock.activateApp(appKey, host.scope)
   }
 
   label: entry ? entry.name : (windows.length > 0 && windows[0].title ? windows[0].title : appId)
 
-  onScrolled: function(step) { dock.cycleWindows(appKey, step) }
+  onScrolled: function(step) { dock.cycleWindows(appKey, step, host.scope) }
 
   onClicked: function(button) {
     if (button === Qt.RightButton) host.openMenu(item, menuEntries())
