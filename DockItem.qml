@@ -130,8 +130,13 @@ DockSlot {
       model: item.indicators
       Rectangle {
         required property string modelData
-        readonly property int along: modelData === "focused" ? Math.round(item.host.iconSize * 0.34) : modelData === "minimized" ? 7 : 4
-        readonly property int across: modelData === "minimized" ? 2 : 4
+        readonly property string style: item.dock.config.indicatorStyle
+        readonly property int along: style === "dots" ? 4
+          : style === "dashes" ? Math.round(item.host.iconSize * 0.2)
+          : style === "segments" ? Math.floor((item.host.iconSize * 0.6 - 3 * (item.indicators.length - 1)) / item.indicators.length)
+          : modelData === "focused" ? Math.round(item.host.iconSize * 0.34) : modelData === "minimized" ? 7 : 4
+        readonly property int across: style === "dashes" || style === "segments" ? 3
+          : style === "default" && modelData === "minimized" ? 2 : 4
         width: item.host.vertical ? across : along
         height: item.host.vertical ? along : across
         radius: across / 2

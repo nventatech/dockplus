@@ -20,6 +20,11 @@ Item {
   readonly property bool showAppsButton: adapter.showAppsButton
   readonly property bool showTrash: adapter.showTrash
   readonly property bool showDrives: adapter.showDrives
+  readonly property int minOpacity: 40
+  readonly property var indicatorStyles: ["default", "dots", "dashes", "segments"]
+  readonly property string indicatorStyle: indicatorStyles.indexOf(adapter.indicatorStyle) !== -1 ? adapter.indicatorStyle : "default"
+  readonly property int backgroundOpacity: Math.max(minOpacity, Math.min(100, adapter.backgroundOpacity))
+  readonly property bool panelMode: adapter.panelMode
   readonly property bool isolateMonitors: adapter.isolateMonitors
   readonly property bool isolateWorkspaces: adapter.isolateWorkspaces
   readonly property var clickActions: ["smart", "cycle", "launch"]
@@ -46,6 +51,9 @@ Item {
   function setShowAppsButton(value) { adapter.showAppsButton = value === true }
   function setShowTrash(value) { adapter.showTrash = value === true }
   function setShowDrives(value) { adapter.showDrives = value === true }
+  function setIndicatorStyle(value) { if (indicatorStyles.indexOf(value) !== -1) adapter.indicatorStyle = value }
+  function setBackgroundOpacity(value) { adapter.backgroundOpacity = Math.max(minOpacity, Math.min(100, Math.round(value))) }
+  function setPanelMode(value) { adapter.panelMode = value === true }
   function setIsolateMonitors(value) { adapter.isolateMonitors = value === true }
   function setIsolateWorkspaces(value) { adapter.isolateWorkspaces = value === true }
   function setClickAction(value) { if (clickActions.indexOf(value) !== -1) adapter.clickAction = value }
@@ -100,6 +108,9 @@ Item {
       property bool showDrives: true
       property string clickAction: "smart"
       property bool isolateMonitors: false
+      property string indicatorStyle: "default"
+      property int backgroundOpacity: 100
+      property bool panelMode: false
       property bool isolateWorkspaces: false
       property list<string> pinned: []
     }

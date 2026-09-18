@@ -20,7 +20,8 @@ PanelWindow {
   readonly property int itemSpacing: 2
   readonly property int slotSize: iconSize + itemPadding * 2 + itemSpacing
   readonly property int panelThickness: iconSize + itemPadding * 2 + indicatorSpace + panelPadding * 2
-  readonly property int edgeGap: 8
+  readonly property bool panelMode: dock.config.panelMode
+  readonly property int edgeGap: panelMode ? 0 : 8
   readonly property int edgeSpace: panelThickness + edgeGap
   readonly property int overlaySpace: vertical ? 380 : 520
   readonly property int popupGap: 8
@@ -241,10 +242,12 @@ PanelWindow {
     Rectangle {
       id: panel
 
-      readonly property real restX: win.position === "left" ? win.edgeGap
+      readonly property real restX: win.panelMode && !win.vertical ? 0
+        : win.position === "left" ? win.edgeGap
         : win.position === "right" ? content.width - win.edgeSpace
         : Math.round((content.width - width) / 2)
-      readonly property real restY: win.vertical ? Math.round((content.height - height) / 2) : win.overlaySpace
+      readonly property real restY: win.panelMode && win.vertical ? 0
+        : win.vertical ? Math.round((content.height - height) / 2) : win.overlaySpace
       readonly property real hiddenX: win.position === "left" ? -(win.panelThickness + 4)
         : win.position === "right" ? content.width + 4
         : restX
@@ -252,10 +255,10 @@ PanelWindow {
 
       x: win.shown ? restX : hiddenX
       y: win.shown ? restY : hiddenY
-      width: win.vertical ? win.panelThickness : grid.implicitWidth + win.panelPadding * 2
-      height: win.vertical ? grid.implicitHeight + win.panelPadding * 2 : win.panelThickness
-      radius: Style.cornerRadius
-      color: Color.bar.background
+      width: win.vertical ? win.panelThickness : win.panelMode ? content.width : grid.implicitWidth + win.panelPadding * 2
+      height: !win.vertical ? win.panelThickness : win.panelMode ? content.height : grid.implicitHeight + win.panelPadding * 2
+      radius: win.panelMode ? 0 : Style.cornerRadius
+      color: Util.alpha(Color.bar.background, win.dock.config.backgroundOpacity / 100)
       border.width: win.borderWidth
       border.color: Color.popups.border
 

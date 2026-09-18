@@ -11,6 +11,7 @@ PanelWindow {
 
   readonly property var config: dock.config
   readonly property int borderWidth: Math.max(1, Style.space(2))
+  readonly property int columnWidth: 380
   readonly property var positionChoices: [
     { value: "bottom", label: dock.tr("positionBottom") },
     { value: "left", label: dock.tr("positionLeft") },
@@ -20,6 +21,12 @@ PanelWindow {
     { value: "smart", label: dock.tr("clickSmart") },
     { value: "cycle", label: dock.tr("clickCycle") },
     { value: "launch", label: dock.tr("clickLaunch") }
+  ]
+  readonly property var indicatorChoices: [
+    { value: "default", label: dock.tr("indicatorDefault") },
+    { value: "dots", label: dock.tr("indicatorDots") },
+    { value: "dashes", label: dock.tr("indicatorDashes") },
+    { value: "segments", label: dock.tr("indicatorSegments") }
   ]
   readonly property var monitorChoices: {
     var choices = [{ value: "", label: dock.tr("allMonitors") }]
@@ -53,7 +60,7 @@ PanelWindow {
   Rectangle {
     id: card
     anchors.centerIn: parent
-    width: 440
+    width: body.implicitWidth + 48
     height: body.implicitHeight + 48
     radius: Style.cornerRadius
     color: Color.popups.background
@@ -66,7 +73,6 @@ PanelWindow {
       id: body
       x: 24
       y: 24
-      width: parent.width - 48
       spacing: 22
 
       Text {
@@ -77,176 +83,142 @@ PanelWindow {
         font.bold: true
       }
 
-      ToggleRow {
-        width: parent.width
-        label: win.dock.tr("autohide")
-        hint: win.dock.tr("autohideHint")
-        checked: win.config.autohide
-        onToggled: function(value) { win.config.setAutohide(value) }
-      }
+      Grid {
+        columns: win.width >= win.columnWidth * 2 + 140 ? 2 : 1
+        columnSpacing: 40
+        rowSpacing: 22
 
-      Column {
-        width: parent.width
-        spacing: 10
-
-        Item {
-          width: parent.width
-          height: sizeLabel.implicitHeight
+        Column {
+          width: win.columnWidth
+          spacing: 22
 
           Text {
-            id: sizeLabel
-            text: win.dock.tr("iconSize")
-            color: Color.popups.text
-            font.family: Style.fontFamily
-            font.pixelSize: Style.fontPx(1)
-          }
-
-          Text {
-            anchors.right: parent.right
-            text: win.config.iconSize + " px"
+            text: win.dock.tr("appearance")
             color: Util.alpha(Color.popups.text, 0.6)
             font.family: Style.fontFamily
-            font.pixelSize: Style.fontPx(1)
-          }
-        }
-
-        Item {
-          id: slider
-          width: parent.width
-          height: 24
-
-          readonly property real ratio: (win.config.iconSize - win.config.minIconSize)
-            / (win.config.maxIconSize - win.config.minIconSize)
-
-          function apply(position) {
-            var clamped = Math.max(0, Math.min(1, position / width))
-            var value = win.config.minIconSize + clamped * (win.config.maxIconSize - win.config.minIconSize)
-            win.config.setIconSize(Math.round(value / 4) * 4)
+            font.pixelSize: Style.fontPx(0.9)
+            font.bold: true
           }
 
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
+          SliderRow {
             width: parent.width
-            height: 4
-            radius: 2
-            color: Util.alpha(Color.popups.text, 0.2)
-
-            Rectangle {
-              width: Math.round(parent.width * slider.ratio)
-              height: parent.height
-              radius: 2
-              color: Color.accent
+            label: win.dock.tr("iconSize")
+            valueText: win.config.iconSize + " px"
+            ratio: (win.config.iconSize - win.config.minIconSize) / (win.config.maxIconSize - win.config.minIconSize)
+            onMoved: function(ratio) {
+              var value = win.config.minIconSize + ratio * (win.config.maxIconSize - win.config.minIconSize)
+              win.config.setIconSize(Math.round(value / 4) * 4)
             }
           }
 
-          Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            x: Math.round((parent.width - width) * slider.ratio)
-            width: 16
-            height: 16
-            radius: Math.min(8, Style.cornerRadius + 2)
-            color: Color.accent
+          SliderRow {
+            width: parent.width
+            label: win.dock.tr("backgroundOpacity")
+            valueText: win.config.backgroundOpacity + "%"
+            ratio: (win.config.backgroundOpacity - win.config.minOpacity) / (100 - win.config.minOpacity)
+            onMoved: function(ratio) {
+              var value = win.config.minOpacity + ratio * (100 - win.config.minOpacity)
+              win.config.setBackgroundOpacity(Math.round(value / 5) * 5)
+            }
           }
 
-          MouseArea {
-            anchors.fill: parent
-            onPressed: function(event) { slider.apply(event.x) }
-            onPositionChanged: function(event) { if (pressed) slider.apply(event.x) }
+          ChoiceRow {
+            width: parent.width
+            label: win.dock.tr("position")
+            options: win.positionChoices
+            current: win.config.position
+            onChosen: function(value) { win.config.setPosition(value) }
+          }
+
+          ChoiceRow {
+            width: parent.width
+            label: win.dock.tr("monitor")
+            options: win.monitorChoices
+            current: win.config.monitor
+            onChosen: function(value) { win.config.setMonitor(value) }
+          }
+
+          ChoiceRow {
+            width: parent.width
+            label: win.dock.tr("indicatorStyle")
+            options: win.indicatorChoices
+            current: win.config.indicatorStyle
+            onChosen: function(value) { win.config.setIndicatorStyle(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("panelMode")
+            hint: win.dock.tr("panelModeHint")
+            checked: win.config.panelMode
+            onToggled: function(value) { win.config.setPanelMode(value) }
           }
         }
-      }
 
-      Column {
-        width: parent.width
-        spacing: 10
+        Column {
+          width: win.columnWidth
+          spacing: 22
 
-        Text {
-          text: win.dock.tr("clickAction")
-          color: Color.popups.text
-          font.family: Style.fontFamily
-          font.pixelSize: Style.fontPx(1)
+          Text {
+            text: win.dock.tr("behavior")
+            color: Util.alpha(Color.popups.text, 0.6)
+            font.family: Style.fontFamily
+            font.pixelSize: Style.fontPx(0.9)
+            font.bold: true
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("autohide")
+            hint: win.dock.tr("autohideHint")
+            checked: win.config.autohide
+            onToggled: function(value) { win.config.setAutohide(value) }
+          }
+
+          ChoiceRow {
+            width: parent.width
+            label: win.dock.tr("clickAction")
+            options: win.clickChoices
+            current: win.config.clickAction
+            onChosen: function(value) { win.config.setClickAction(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("isolateMonitors")
+            hint: win.dock.tr("isolateHint")
+            checked: win.config.isolateMonitors
+            onToggled: function(value) { win.config.setIsolateMonitors(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("isolateWorkspaces")
+            checked: win.config.isolateWorkspaces
+            onToggled: function(value) { win.config.setIsolateWorkspaces(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("showAppsButton")
+            checked: win.config.showAppsButton
+            onToggled: function(value) { win.config.setShowAppsButton(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("showTrash")
+            checked: win.config.showTrash
+            onToggled: function(value) { win.config.setShowTrash(value) }
+          }
+
+          ToggleRow {
+            width: parent.width
+            label: win.dock.tr("showDrives")
+            checked: win.config.showDrives
+            onToggled: function(value) { win.config.setShowDrives(value) }
+          }
         }
-
-        ChoiceChips {
-          width: parent.width
-          options: win.clickChoices
-          current: win.config.clickAction
-          onChosen: function(value) { win.config.setClickAction(value) }
-        }
-      }
-
-      Column {
-        width: parent.width
-        spacing: 10
-
-        Text {
-          text: win.dock.tr("position")
-          color: Color.popups.text
-          font.family: Style.fontFamily
-          font.pixelSize: Style.fontPx(1)
-        }
-
-        ChoiceChips {
-          width: parent.width
-          options: win.positionChoices
-          current: win.config.position
-          onChosen: function(value) { win.config.setPosition(value) }
-        }
-      }
-
-      Column {
-        width: parent.width
-        spacing: 10
-
-        Text {
-          text: win.dock.tr("monitor")
-          color: Color.popups.text
-          font.family: Style.fontFamily
-          font.pixelSize: Style.fontPx(1)
-        }
-
-        ChoiceChips {
-          width: parent.width
-          options: win.monitorChoices
-          current: win.config.monitor
-          onChosen: function(value) { win.config.setMonitor(value) }
-        }
-      }
-
-      ToggleRow {
-        width: parent.width
-        label: win.dock.tr("showAppsButton")
-        checked: win.config.showAppsButton
-        onToggled: function(value) { win.config.setShowAppsButton(value) }
-      }
-
-      ToggleRow {
-        width: parent.width
-        label: win.dock.tr("showTrash")
-        checked: win.config.showTrash
-        onToggled: function(value) { win.config.setShowTrash(value) }
-      }
-
-      ToggleRow {
-        width: parent.width
-        label: win.dock.tr("showDrives")
-        checked: win.config.showDrives
-        onToggled: function(value) { win.config.setShowDrives(value) }
-      }
-
-      ToggleRow {
-        width: parent.width
-        label: win.dock.tr("isolateMonitors")
-        hint: win.dock.tr("isolateHint")
-        checked: win.config.isolateMonitors
-        onToggled: function(value) { win.config.setIsolateMonitors(value) }
-      }
-
-      ToggleRow {
-        width: parent.width
-        label: win.dock.tr("isolateWorkspaces")
-        checked: win.config.isolateWorkspaces
-        onToggled: function(value) { win.config.setIsolateWorkspaces(value) }
       }
 
       Item {
