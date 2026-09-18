@@ -22,7 +22,7 @@ PanelWindow {
   readonly property int panelThickness: iconSize + itemPadding * 2 + indicatorSpace + panelPadding * 2
   readonly property int edgeGap: 8
   readonly property int edgeSpace: panelThickness + edgeGap
-  readonly property int overlaySpace: vertical ? 380 : 240
+  readonly property int overlaySpace: vertical ? 380 : 520
   readonly property int popupGap: 8
   readonly property int revealStrip: 2
   readonly property int borderWidth: Math.max(1, Style.space(2))
@@ -384,12 +384,22 @@ PanelWindow {
             readonly property var entry: win.menuEntries[index] || ({})
 
             width: 230
-            height: menuLabel.implicitHeight + 14
+            height: entry.separator ? 9 : menuLabel.implicitHeight + 14
             radius: Style.cornerRadius
-            color: menuMouse.containsMouse ? Util.alpha(Color.popups.text, 0.1) : "transparent"
+            color: menuMouse.containsMouse && !entry.separator ? Util.alpha(Color.popups.text, 0.1) : "transparent"
+
+            Rectangle {
+              visible: menuRow.entry.separator === true
+              anchors.verticalCenter: parent.verticalCenter
+              x: 10
+              width: parent.width - 20
+              height: 1
+              color: Util.alpha(Color.popups.text, 0.15)
+            }
 
             Text {
               id: menuLabel
+              visible: menuRow.entry.separator !== true
               anchors.verticalCenter: parent.verticalCenter
               x: 14
               width: parent.width - 28
@@ -404,6 +414,7 @@ PanelWindow {
               id: menuMouse
               anchors.fill: parent
               hoverEnabled: true
+              enabled: menuRow.entry.separator !== true
               onClicked: win.runMenuEntry(menuRow.entry)
             }
           }

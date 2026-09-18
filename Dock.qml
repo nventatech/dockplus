@@ -17,6 +17,7 @@ Item {
   property alias drives: dockDrives
   property var minimizeOrder: []
   property int entriesRevision: 0
+  readonly property int maxActions: 10
 
   property var clients: ({})
   readonly property var toplevels: Hyprland.toplevels.values.filter(function(toplevel) {
@@ -94,6 +95,26 @@ Item {
   function entryFor(appId) {
     if (!appId || entriesRevision < 0) return null
     return DesktopEntries.byId(appId) || DesktopEntries.heuristicLookup(appId)
+  }
+
+  function actionsFor(key) {
+    var entry = entryFor(key)
+    if (!entry) return []
+    var main = JSON.stringify(entry.command)
+    var out = []
+    for (var i = 0; i < entry.actions.length && out.length < maxActions; i++) {
+      var action = entry.actions[i]
+      if (JSON.stringify(action.command) !== main) out.push(action)
+    }
+    return out
+  }
+
+  function runAction(action) {
+    if (!action) return
+    if (action.command && action.command.length > 0)
+      Quickshell.execDetached(["uwsm-app", "--"].concat(action.command))
+    else
+      action.execute()
   }
 
   function pinApp(appId) {

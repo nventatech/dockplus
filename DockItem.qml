@@ -29,6 +29,11 @@ DockSlot {
     var minimized = minimizedWindows.slice()
     var all = windows.slice()
     if (entry) entries.push({ label: dock.tr("newWindow"), run: function() { item.dock.launch(item.appKey) } })
+    var actions = dock.actionsFor(appKey)
+    actions.forEach(function(action) {
+      entries.push({ label: action.name, run: function() { item.dock.runAction(action) } })
+    })
+    if (actions.length > 0) entries.push({ separator: true })
     if (open.length > 0) entries.push({ label: dock.tr("minimize"), run: function() {
       var target = open.find(function(window) { return window.activated }) || open[0]
       item.dock.minimizeWindow(target)
