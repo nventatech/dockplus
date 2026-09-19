@@ -9,7 +9,7 @@ A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so Do
 
 ![DockPlus](preview.png)
 
-## ✨ Features
+## Features
 
 - One icon per app: pinned apps, running apps and their minimized windows together.
 - Real minimize, including the minimize button of X11 apps such as Steam.
@@ -21,7 +21,7 @@ A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so Do
 - Scroll to cycle windows, a bounce while an app starts and a wiggle when a window asks for attention.
 - Settings window with tabs for appearance, position, behavior, animations and items.
 
-## 🖼 Screenshots
+## Screenshots
 
 | Previews | Minimized windows |
 | --- | --- |
@@ -35,11 +35,11 @@ A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so Do
 | --- | --- |
 | ![Behavior](screenshots/settings-behavior.png) | ![Left edge](screenshots/dock-left.png) |
 
-## 📋 Requirements
+## Requirements
 
 Omarchy 4 (Quattro). Everything else ships with Omarchy: `python3` for the X11 minimize helper, `udisks2` and `gvfs` for drives and trash, `gtk-launch` and `uwsm` to start apps.
 
-## 📦 Install
+## Install
 
 ```bash
 omarchy plugin add https://github.com/nventatech/dockplus --enable
@@ -47,7 +47,7 @@ omarchy plugin add https://github.com/nventatech/dockplus --enable
 
 Right click any icon and pick **Dock settings** to change anything, or run `omarchy-shell dockplus settings`.
 
-## ⌨️ Keybindings
+## Keybindings
 
 Add to `~/.config/hypr/bindings.lua`:
 
@@ -61,7 +61,7 @@ The setting **Super + 1-9 opens dock items** binds `SUPER + 1..9` to the dock in
 
 Other commands: `omarchy-shell dockplus settings`, `activate <N>`, `pin <appId>`, `unpin <appId>`, `move <appId|@drives|@trash|@apps> <index>` and `position <bottom|left|right>`.
 
-## ⚙️ Configuration
+## Configuration
 
 Stored in `~/.config/dockplus/config.json` and edited by the settings window:
 
@@ -72,20 +72,20 @@ Stored in `~/.config/dockplus/config.json` and edited by the settings window:
 - Items: `showPinned`, `showAppsButton`, `showTrash`, `showDrives`, `isolateMonitors`, `isolateWorkspaces`.
 - `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.
 
-## 🗑 Remove
+## Remove
 
 1. Turn off **Super + 1-9 opens dock items** if you turned it on (or run `hyprctl reload` afterwards).
 2. Run `omarchy plugin remove io.github.nventatech.dockplus`.
 3. Delete `~/.config/dockplus` and any DockPlus lines you added to `bindings.lua`.
 
-## ❤️ Donate
+## Donate
 
 If DockPlus is useful to you, you can support it through PayPal:
 
-[![Donate — PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=SR28XBBCYSPHE&no_recurring=0&item_name=Help+me+buy+a+coffee.&currency_code=USD)
+[![Donate via PayPal](https://img.shields.io/badge/PayPal-Donate-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=SR28XBBCYSPHE&no_recurring=0&item_name=Help+me+buy+a+coffee.&currency_code=USD)
 
 <img src="assets/donate-qr.png" width="140" alt="PayPal donation QR code">
 
-## 📄 License
+## License
 
 [GPL-3.0](LICENSE)
