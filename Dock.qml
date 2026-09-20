@@ -30,6 +30,15 @@ Item {
     return root.clients["0x" + toplevel.address] !== undefined
   })
 
+  readonly property var badgeKeys: {
+    var keys = config.pinned.slice()
+    for (var i = 0; i < toplevels.length; i++) {
+      var key = keyOf(toplevels[i])
+      if (keys.indexOf(key) === -1) keys.push(key)
+    }
+    return keys
+  }
+
   function entriesFor(scope) {
     var order = config.order
     var running = []
@@ -442,7 +451,10 @@ Item {
     dock: root
   }
 
-  Badges { id: dockBadges }
+  Badges {
+    id: dockBadges
+    known: root.badgeKeys
+  }
 
   Recording {
     id: dockRecording

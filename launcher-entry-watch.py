@@ -21,19 +21,20 @@ def app_id(uri):
 def on_update(connection, sender, path, interface, signal, params):
     try:
         uri, props = params.unpack()
+        key = app_id(uri)
+        if not key:
+            return
+        update = {
+            "appId": key,
+            "count": int(props.get("count", 0)),
+            "countVisible": bool(props.get("count-visible", False)),
+            "progress": float(props.get("progress", 0.0)),
+            "progressVisible": bool(props.get("progress-visible", False)),
+            "urgent": bool(props.get("urgent", False)),
+        }
     except Exception:
         return
-    key = app_id(uri)
-    if not key:
-        return
-    print(json.dumps({
-        "appId": key,
-        "count": int(props.get("count", 0)),
-        "countVisible": bool(props.get("count-visible", False)),
-        "progress": float(props.get("progress", 0.0)),
-        "progressVisible": bool(props.get("progress-visible", False)),
-        "urgent": bool(props.get("urgent", False)),
-    }), flush=True)
+    print(json.dumps(update), flush=True)
 
 
 def main():

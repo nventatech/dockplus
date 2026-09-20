@@ -50,15 +50,22 @@ Right click any icon and pick **Dock settings** to change anything, or run `omar
 
 ## Keybindings
 
-Add to `~/.config/hypr/bindings.lua`:
+DockPlus adds no keybinding on its own. Add the ones you want to `~/.config/hypr/bindings.lua`.
+
+Omarchy already uses `SUPER + S` for the scratchpad, so unbind it first to put the dock there:
 
 ```lua
-o.bind("SUPER + M", "Minimize window", "omarchy-shell dockplus minimize")
-o.bind("SUPER + SHIFT + M", "Restore last minimized window", "omarchy-shell dockplus restore")
-o.bind("SUPER + ALT + M", "Pick minimized window to restore", "omarchy-shell dockplus pick")
+hl.unbind("SUPER + S")
+hl.unbind("SUPER + ALT + S")
+
+o.bind("SUPER + S", "Minimize window", "omarchy-shell dockplus minimize")
+o.bind("SUPER + SHIFT + S", "Restore last minimized window", "omarchy-shell dockplus restore")
+o.bind("SUPER + ALT + S", "Pick minimized window to restore", "omarchy-shell dockplus pick")
 ```
 
-The setting **Super + 1-9 opens dock items** binds `SUPER + 1..9` to the dock instead of the Omarchy workspace switch while it is on. It changes the running binds only, never your config files.
+Pick another letter if you use the scratchpad. With preinstalled application bindings on, Omarchy already holds `SUPER + SHIFT + S` for Google Maps and `SUPER + SHIFT + M` for Spotify, so run `hyprctl binds` before choosing.
+
+Two settings touch Hyprland while they are on. **Super + 1-9 opens dock items** binds `SUPER + 1..9` to the dock instead of the Omarchy workspace switch, and **Blur behind the dock** adds a layer rule for the dock surface. Both change the running Hyprland configuration only, never your config files, and `hyprctl reload` undoes either one.
 
 Other commands: `omarchy-shell dockplus settings`, `activate <N>`, `pin <appId>`, `unpin <appId>`, `folder <path>`, `unfolder <path>`, `move <appId|@drives|@trash|@apps|@folder:path> <index>` and `position <bottom|left|right>`.
 
@@ -79,11 +86,11 @@ Stored in `~/.config/dockplus/config.json` and edited by the settings window:
 ./tests/run.sh
 ```
 
-Runs the pure logic and the drive parsing in a throwaway Quickshell config. Exits non zero on the first failing check.
+Runs the pure logic and the drive parsing in a throwaway Quickshell config. Prints every failing check and exits non zero if any of them failed.
 
 ## Limitations
 
-The minimize button drawn by a native Wayland app does nothing. The app sends the request and Hyprland drops it, so nothing outside the compositor ever sees the click. XWayland apps such as Steam work, and an Electron app can be moved to XWayland with `--ozone-platform=x11`. For everything else use `SUPER + M` or the icon menu.
+The minimize button drawn by a native Wayland app does nothing. The app sends the request and Hyprland drops it, so nothing outside the compositor ever sees the click. XWayland apps such as Steam work, and an Electron app can be moved to XWayland with `--ozone-platform=x11`. For everything else use your minimize binding or the icon menu.
 
 With the dock on an edge shared with another monitor, the pointer crosses to the other screen instead of stopping. That makes the 2px reveal strip hard to hit while autohide is on.
 
