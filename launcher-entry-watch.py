@@ -9,6 +9,9 @@ from gi.repository import Gio, GLib
 
 INTERFACE = "com.canonical.Unity.LauncherEntry"
 SUFFIX = ".desktop"
+MAX_MESSAGE = 4096
+MAX_KEY = 128
+MAX_COUNT = 9999
 
 
 def app_id(uri):
@@ -18,17 +21,23 @@ def app_id(uri):
     return name
 
 
+def clamp(value, low, high):
+    return max(low, min(high, value))
+
+
 def on_update(connection, sender, path, interface, signal, params):
     try:
+        if params.get_size() > MAX_MESSAGE:
+            return
         uri, props = params.unpack()
         key = app_id(uri)
-        if not key:
+        if not key or len(key) > MAX_KEY:
             return
         update = {
             "appId": key,
-            "count": int(props.get("count", 0)),
+            "count": clamp(int(props.get("count", 0)), 0, MAX_COUNT),
             "countVisible": bool(props.get("count-visible", False)),
-            "progress": float(props.get("progress", 0.0)),
+            "progress": clamp(float(props.get("progress", 0.0)), 0.0, 1.0),
             "progressVisible": bool(props.get("progress-visible", False)),
             "urgent": bool(props.get("urgent", False)),
         }

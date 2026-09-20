@@ -12,6 +12,7 @@ Item {
 
   readonly property int maxEntries: 64
   readonly property int maxRetries: 3
+  readonly property int maxLine: 512
   readonly property string script: Qt.resolvedUrl("launcher-entry-watch.py").toString().replace("file://", "")
 
   function of(key) { return map[key] || null }
@@ -44,6 +45,7 @@ Item {
     command: ["python3", root.script]
     stdout: SplitParser {
       onRead: function(line) {
+        if (line.length > root.maxLine) return
         var update = null
         try { update = JSON.parse(line) } catch (error) { return }
         root.apply(update)

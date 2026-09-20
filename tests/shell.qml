@@ -76,6 +76,10 @@ ShellRoot {
     check("badgeFrom clamps progress", Logic.badgeFrom({ appId: "files", progress: 4.2, progressVisible: true }),
       { key: "files", value: { count: 0, progress: 1 } })
     check("badgeFrom without an app id", Logic.badgeFrom({ count: 3, countVisible: true }), null)
+    check("badgeFrom rejects an overlong app id",
+      Logic.badgeFrom({ appId: new Array(200).join("a"), count: 3, countVisible: true }), null)
+    check("badgeFrom clamps a huge count", Logic.badgeFrom({ appId: "discord", count: 1e12, countVisible: true }),
+      { key: "discord", value: { count: 9999, progress: -1 } })
   }
 
   function runDrives() {

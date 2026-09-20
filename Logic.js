@@ -1,5 +1,8 @@
 .pragma library
 
+var maxBadgeKey = 128
+var maxBadgeCount = 9999
+
 function cycleDecision(windowCount, openCount, focusedIndex) {
   if (windowCount <= 0) return "launch"
   if (openCount <= 0) return "restore"
@@ -40,8 +43,8 @@ function folderToken(prefix, path) {
 
 function badgeFrom(update) {
   var key = String(update.appId || "")
-  if (!key) return null
-  var count = update.countVisible ? Math.max(0, Math.round(Number(update.count) || 0)) : 0
+  if (!key || key.length > maxBadgeKey) return null
+  var count = update.countVisible ? Math.min(maxBadgeCount, Math.max(0, Math.round(Number(update.count) || 0))) : 0
   var progress = update.progressVisible ? Math.max(0, Math.min(1, Number(update.progress) || 0)) : -1
   if (count === 0 && progress < 0) return { key: key, value: null }
   return { key: key, value: { count: count, progress: progress } }
