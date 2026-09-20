@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "id": "io.github.nventatech.dockplus",
   "name": "DockPlus",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": "nventatech",
-  "description": "Dash to Dock style dock with real minimize, live window previews, trash, removable drives and an app menu button.",
+  "description": "Dash to Dock style dock with real minimize, live window previews, icon badges, pinned folders, trash, removable drives and an app menu button.",
   "kinds": [
     "panel"
   ],
