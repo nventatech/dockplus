@@ -72,6 +72,12 @@ Stored in `~/.config/dockplus/config.json` and edited by the settings window:
 - Items: `showPinned`, `showAppsButton`, `showTrash`, `showDrives`, `isolateMonitors`, `isolateWorkspaces`.
 - `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.
 
+## Limitations
+
+The minimize button drawn by a native Wayland app does nothing. The app sends the request and Hyprland drops it, so nothing outside the compositor ever sees the click. XWayland apps such as Steam work, and an Electron app can be moved to XWayland with `--ozone-platform=x11`. For everything else use `SUPER + M` or the icon menu.
+
+With the dock on an edge shared with another monitor, the pointer crosses to the other screen instead of stopping. That makes the 2px reveal strip hard to hit while autohide is on.
+
 ## Remove
 
 1. Turn off **Super + 1-9 opens dock items** if you turned it on (or run `hyprctl reload` afterwards).
