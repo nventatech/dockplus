@@ -116,6 +116,7 @@ Item {
 
     Text {
       id: numberLabel
+      textFormat: Text.PlainText
       anchors.centerIn: parent
       text: slot.renderedIndex + 1
       color: Color.bar.background

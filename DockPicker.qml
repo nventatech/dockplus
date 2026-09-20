@@ -100,6 +100,7 @@ PanelWindow {
       spacing: 12
 
       Text {
+        textFormat: Text.PlainText
         text: win.dock.tr("pickerTitle")
         color: Color.popups.text
         font.family: Style.fontFamily

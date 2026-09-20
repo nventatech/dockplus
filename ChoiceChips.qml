@@ -31,6 +31,7 @@ Flow {
 
       Text {
         id: chipLabel
+        textFormat: Text.PlainText
         x: chips.stacked ? 12 : Math.round((parent.width - width) / 2)
         anchors.verticalCenter: parent.verticalCenter
         text: chip.option.label

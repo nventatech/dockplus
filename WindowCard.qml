@@ -67,6 +67,7 @@ Rectangle {
 
     Text {
       id: badge
+      textFormat: Text.PlainText
       anchors.centerIn: parent
       text: card.dock.tr("minimized")
       color: Color.popups.text
@@ -77,6 +78,7 @@ Rectangle {
 
   Text {
     id: cardTitle
+    textFormat: Text.PlainText
     x: 6
     y: thumbBox.y + thumbBox.height + 6
     width: parent.width - 12
@@ -113,6 +115,7 @@ Rectangle {
     border.color: Util.alpha(Color.popups.text, 0.4)
 
     Text {
+      textFormat: Text.PlainText
       anchors.centerIn: parent
       text: "×"
       color: Color.popups.text

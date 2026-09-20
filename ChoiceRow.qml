@@ -14,6 +14,7 @@ Column {
   spacing: 10
 
   Text {
+    textFormat: Text.PlainText
     text: row.label
     color: Color.popups.text
     font.family: Style.fontFamily

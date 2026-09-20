@@ -133,6 +133,7 @@ PanelWindow {
 
           Text {
             id: tabGlyph
+            textFormat: Text.PlainText
             x: 14
             anchors.verticalCenter: parent.verticalCenter
             text: win.tabs[tabButton.index].glyph
@@ -143,6 +144,7 @@ PanelWindow {
 
           Text {
             id: tabLabel
+            textFormat: Text.PlainText
             x: 44
             anchors.verticalCenter: parent.verticalCenter
             text: win.dock.tr(win.tabs[tabButton.index].key)
@@ -170,6 +172,7 @@ PanelWindow {
       spacing: 4
 
       Text {
+        textFormat: Text.PlainText
         text: win.dock.tr("settingsTitle").toUpperCase()
         color: Color.accent
         font.family: Style.fontFamily
@@ -178,6 +181,7 @@ PanelWindow {
       }
 
       Text {
+        textFormat: Text.PlainText
         text: win.dock.tr(win.tabs[win.tab].key).toUpperCase()
         color: Color.accent
         font.family: Style.fontFamily
@@ -456,6 +460,7 @@ PanelWindow {
 
         Text {
           id: closeLabel
+          textFormat: Text.PlainText
           anchors.centerIn: parent
           text: win.dock.tr("close") + " (Esc)"
           color: Color.popups.text

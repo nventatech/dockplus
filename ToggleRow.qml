@@ -18,6 +18,7 @@ Item {
     spacing: 3
 
     Text {
+      textFormat: Text.PlainText
       text: row.label
       color: Color.popups.text
       font.family: Style.fontFamily
@@ -25,6 +26,7 @@ Item {
     }
 
     Text {
+      textFormat: Text.PlainText
       visible: row.hint !== ""
       width: parent.width
       text: row.hint

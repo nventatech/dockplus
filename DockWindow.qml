@@ -412,6 +412,7 @@ PanelWindow {
 
       Text {
         id: tooltipText
+        textFormat: Text.PlainText
         anchors.centerIn: parent
         width: Math.min(implicitWidth, 340)
         text: win.hoveredItem ? win.hoveredItem.label : ""
@@ -516,6 +517,7 @@ PanelWindow {
 
             Text {
               id: menuLabel
+              textFormat: Text.PlainText
               visible: menuRow.entry.separator !== true
               anchors.verticalCenter: parent.verticalCenter
               x: 14

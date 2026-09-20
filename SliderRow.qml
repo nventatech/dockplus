@@ -18,6 +18,7 @@ Column {
 
     Text {
       id: title
+      textFormat: Text.PlainText
       text: row.label
       color: Color.popups.text
       font.family: Style.fontFamily
@@ -25,6 +26,7 @@ Column {
     }
 
     Text {
+      textFormat: Text.PlainText
       anchors.right: parent.right
       text: row.valueText
       color: Util.alpha(Color.popups.text, 0.6)
