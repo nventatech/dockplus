@@ -35,7 +35,8 @@ PanelWindow {
     return workspace ? workspace.toplevels.values.length === 0 : false
   }
   readonly property bool fullscreenActive: hyprMonitor ? dock.fullscreenOn(hyprMonitor.name) : false
-  readonly property bool wantShown: !fullscreenActive
+  readonly property bool recordingActive: dock.config.hideWhileRecording && dock.recording
+  readonly property bool wantShown: !fullscreenActive && !recordingActive
     && (!autohide || hover.hovered || menuOpen || previewOpen || workspaceEmpty || dragItem !== null || urgentReveal || numbersVisible || fileDragActive)
   property bool shown: !autohide
   property bool urgentReveal: false
@@ -175,6 +176,13 @@ PanelWindow {
     if (drive.mounted) entries.push({ label: dock.tr("unmount"), run: function() { drives.unmount(drive) } })
     entries.push({ label: dock.tr("safelyRemove"), run: function() { drives.eject(drive) } })
     return entries
+  }
+
+  function folderMenu(token, path) {
+    return [
+      { label: dock.tr("open"), run: function() { dock.openFolder(path) } },
+      { label: dock.tr("removeFromDock"), run: function() { dock.config.removeToken(token) } }
+    ]
   }
 
   function trashMenu(anchor) {

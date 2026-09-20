@@ -249,6 +249,14 @@ PanelWindow {
           checked: win.config.panelMode
           onToggled: function(value) { win.config.setPanelMode(value) }
         }
+
+        ToggleRow {
+          width: parent.width
+          label: win.dock.tr("blur")
+          hint: win.dock.tr("blurHint")
+          checked: win.config.blur
+          onToggled: function(value) { win.config.setBlur(value) }
+        }
       }
 
       Column {
@@ -311,6 +319,13 @@ PanelWindow {
           hint: win.dock.tr("superNumbersHint")
           checked: win.config.superNumbers
           onToggled: function(value) { win.config.setSuperNumbers(value) }
+        }
+
+        ToggleRow {
+          width: parent.width
+          label: win.dock.tr("hideWhileRecording")
+          checked: win.config.hideWhileRecording
+          onToggled: function(value) { win.config.setHideWhileRecording(value) }
         }
       }
 

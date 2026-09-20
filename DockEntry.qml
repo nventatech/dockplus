@@ -14,6 +14,7 @@ Loader {
   sourceComponent: modelData.kind === "app" ? appEntry
     : modelData.kind === "drive" ? driveEntry
     : modelData.kind === "trash" ? trashEntry
+    : modelData.kind === "folder" ? folderEntry
     : appsEntry
 
   Component {
@@ -61,6 +62,24 @@ Loader {
       acceptsDrops: true
       onFilesDropped: function(urls) { loader.dock.trash.trashFiles(urls) }
       menuBuilder: function(anchor) { return loader.host.trashMenu(anchor) }
+    }
+  }
+
+  Component {
+    id: folderEntry
+
+    DockAction {
+      readonly property string path: loader.modelData.path
+
+      dock: loader.dock
+      host: loader.host
+      renderedIndex: loader.index
+      label: loader.dock.folderName(path)
+      iconNames: loader.dock.folderIcons(path)
+      acceptsDrops: true
+      onFilesDropped: function(urls) { loader.dock.copyToFolder(path, loader.dock.localPaths(urls)) }
+      onActivated: loader.dock.openFolder(path)
+      menuBuilder: function(anchor) { return loader.host.folderMenu(loader.modelData.token, path) }
     }
   }
 

@@ -10,7 +10,7 @@ PanelWindow {
   property bool opened: false
   property int selectedIndex: 0
 
-  readonly property var windows: dock.minimizedWindows.slice().reverse()
+  readonly property var windows: dock.minimizer.list.slice().reverse()
   readonly property int borderWidth: Math.max(1, Style.space(2))
   readonly property int cardWidth: 260
   readonly property int cardSpacing: 8
@@ -41,7 +41,7 @@ PanelWindow {
 
   function restore(toplevel) {
     if (!toplevel) return
-    dock.restoreWindow(toplevel)
+    dock.minimizer.restore(toplevel)
     opened = false
   }
 

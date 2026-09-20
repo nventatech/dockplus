@@ -11,22 +11,21 @@ Item {
   property var shell: null
   property var manifest: null
 
-  readonly property string minimizedWorkspace: "special:minimized"
   readonly property string lang: Qt.locale().name.indexOf("pt") === 0 ? "pt" : "en"
   property alias config: dockConfig
   property alias trash: dockTrash
   property alias drives: dockDrives
-  property var minimizeOrder: []
+  property alias minimizer: dockMinimizer
   property int entriesRevision: 0
   readonly property int maxActions: 10
   readonly property int launchTimeout: 10000
   property var launching: ({})
   property int urgentSerial: 0
-  property var restoring: ({})
   property bool numberBindingsApplied: false
   readonly property string numberScript: Qt.resolvedUrl("dock-number.sh").toString().replace("file://", "")
 
   property var clients: ({})
+  readonly property bool recording: dockRecording.active
   readonly property var toplevels: Hyprland.toplevels.values.filter(function(toplevel) {
     return root.clients["0x" + toplevel.address] !== undefined
   })
@@ -55,6 +54,8 @@ Item {
       } else if (token === "@drives") {
         var list = config.showDrives ? drives.drives : []
         for (var d = 0; d < list.length; d++) out.push({ kind: "drive", token: token, key: list[d].device + "|" + list[d].mountpoint, drive: list[d] })
+      } else if (config.isFolder(token)) {
+        out.push({ kind: "folder", token: token, key: token, path: config.folderPath(token) })
       } else if (!config.isSpecial(token)) {
         if (config.showPinned || windowsOf(token, scope).length > 0) out.push({ kind: "app", token: token, key: token })
       }
@@ -63,14 +64,29 @@ Item {
     return out
   }
 
-  readonly property var minimizedWindows: {
-    var order = minimizeOrder
-    var windows = toplevels.filter(function(toplevel) { return isMinimized(toplevel) })
-    windows.sort(function(a, b) { return order.indexOf(a.address) - order.indexOf(b.address) })
-    return windows
+  function tr(key) { return I18n.tr(lang, key) }
+
+  function badgeFor(key) { return dockBadges.of(key) }
+
+  function folderName(path) { return Logic.folderName(path) }
+
+  function folderIcons(path) { return Logic.folderIcons(path) }
+
+  function openFolder(path) {
+    if (path) Quickshell.execDetached(["gio", "open", path])
   }
 
-  function tr(key) { return I18n.tr(lang, key) }
+  function copyToFolder(path, paths) {
+    if (!path || paths.length === 0) return
+    Quickshell.execDetached(["cp", "-r", "-n", "--"].concat(paths).concat([path]))
+  }
+
+  function addFolder(path) { config.addFolder(path) }
+
+  function applyBlur() {
+    Quickshell.execDetached(["hyprctl", "eval",
+      'hl.layer_rule({ match = { namespace = "^dockplus$" }, blur = ' + (config.blur ? "true" : "false") + ' })'])
+  }
 
   function open(payload) { openSettings() }
   function openSettings() { settings.opened = true }
@@ -183,7 +199,7 @@ Item {
   }
 
   function isMinimized(toplevel) {
-    return workspaceNameOf(toplevel) === minimizedWorkspace
+    return workspaceNameOf(toplevel) === dockMinimizer.workspace
   }
 
   function scopeFor(monitor) {
@@ -242,47 +258,6 @@ Item {
     dispatch('hl.dsp.window.close({ window = "address:' + address(toplevel) + '" })')
   }
 
-  function forgetMinimized(toplevel) {
-    minimizeOrder = minimizeOrder.filter(function(entry) { return entry !== toplevel.address })
-  }
-
-  function minimizeWindow(toplevel) {
-    if (!toplevel || isMinimized(toplevel)) return
-    forgetMinimized(toplevel)
-    minimizeOrder = minimizeOrder.concat([toplevel.address])
-    dispatch('hl.dsp.window.move({ window = "address:' + address(toplevel)
-      + '", workspace = "' + minimizedWorkspace + '", follow = false })')
-  }
-
-  function targetWorkspaceId() {
-    var monitor = Hyprland.focusedMonitor
-    var workspace = monitor && monitor.activeWorkspace ? monitor.activeWorkspace : Hyprland.focusedWorkspace
-    return workspace && workspace.id > 0 ? workspace.id : 1
-  }
-
-  function restoreWindow(toplevel) {
-    if (!toplevel) return
-    forgetMinimized(toplevel)
-    var next = Object.assign({}, restoring)
-    next[toplevel.address] = Date.now() + 1500
-    restoring = next
-    var target = 'window = "address:' + address(toplevel) + '"'
-    Quickshell.execDetached(["sh", "-c",
-      'hyprctl dispatch "$1" && hyprctl dispatch "$2"\n'
-      + 'hyprctl -j monitors | grep -q "\\"special:minimized\\"" && hyprctl dispatch "$3"',
-      "sh",
-      'hl.dsp.window.move({ ' + target + ', workspace = "' + targetWorkspaceId() + '" })',
-      'hl.dsp.focus({ ' + target + ' })',
-      'hl.dsp.workspace.toggle_special("minimized")'])
-  }
-
-  function onWindowFocused(addressHex) {
-    var until = restoring[addressHex]
-    if (until && Date.now() < until) return
-    for (var i = 0; i < toplevels.length; i++)
-      if (toplevels[i].address === addressHex && isMinimized(toplevels[i])) restoreWindow(toplevels[i])
-  }
-
   function x11Toplevel(pid, title) {
     var candidates = toplevels.filter(function(toplevel) {
       var client = clientOf(toplevel)
@@ -291,15 +266,6 @@ Item {
     })
     for (var i = 0; i < candidates.length; i++) if (candidates[i].title === title) return candidates[i]
     return candidates.length > 0 ? candidates[0] : null
-  }
-
-  function minimizeActive() {
-    minimizeWindow(Hyprland.activeToplevel)
-  }
-
-  function restoreLast() {
-    var windows = minimizedWindows
-    if (windows.length > 0) restoreWindow(windows[windows.length - 1])
   }
 
   function openAppsMenu() {
@@ -359,7 +325,7 @@ Item {
       else launch(key)
       return
     }
-    if (windows[0].activated && !isMinimized(windows[0])) minimizeWindow(windows[0])
+    if (windows[0].activated && !isMinimized(windows[0])) dockMinimizer.minimize(windows[0])
     else activateWindow(windows[0])
   }
 
@@ -386,14 +352,14 @@ Item {
     for (var i = 0; i < open.length; i++) if (open[i].activated) focused = i
     var decision = Logic.cycleDecision(windows.length, open.length, focused)
     if (decision === "launch") launch(key)
-    else if (decision === "restore") restoreWindow(windows[windows.length - 1])
+    else if (decision === "restore") dockMinimizer.restore(windows[windows.length - 1])
     else if (decision === "focus") focusWindow(open[0])
-    else if (decision === "minimize") minimizeWindow(open[0])
+    else if (decision === "minimize") dockMinimizer.minimize(open[0])
     else cycleWindows(key, 1, scope)
   }
 
   function activateWindow(toplevel) {
-    if (isMinimized(toplevel)) restoreWindow(toplevel)
+    if (isMinimized(toplevel)) dockMinimizer.restore(toplevel)
     else focusWindow(toplevel)
   }
 
@@ -471,10 +437,26 @@ Item {
     active: dockConfig.showDrives
   }
 
+  Minimizer {
+    id: dockMinimizer
+    dock: root
+  }
+
+  Badges { id: dockBadges }
+
+  Recording {
+    id: dockRecording
+    enabled: dockConfig.hideWhileRecording
+  }
+
+  X11Minimize {
+    onRequested: function(pid, title) { root.minimizer.minimize(root.x11Toplevel(pid, title)) }
+  }
+
   IpcHandler {
     target: "dockplus"
-    function minimize(): void { root.minimizeActive() }
-    function restore(): void { root.restoreLast() }
+    function minimize(): void { root.minimizer.minimizeActive() }
+    function restore(): void { root.minimizer.restoreLast() }
     function pick(): void { root.togglePicker() }
     function settings(): void { root.openSettings() }
     function pin(appId: string): void { root.pinApp(appId) }
@@ -482,10 +464,13 @@ Item {
     function move(name: string, index: int): void { root.moveEntry(name, index) }
     function position(value: string): void { root.config.setPosition(value) }
     function activate(index: int): void { root.activateIndex(index) }
+    function folder(path: string): void { root.addFolder(path) }
+    function unfolder(path: string): void { root.config.removeToken(root.config.folderToken(path)) }
   }
 
   Connections {
     target: dockConfig
+    function onBlurChanged() { root.applyBlur() }
     function onSuperNumbersChanged() {
       if (dockConfig.superNumbers) root.applyNumberBindings()
       else root.releaseNumberBindings()
@@ -504,37 +489,18 @@ Item {
         root.refreshClients()
       } else if (event.name === "configreloaded") {
         if (root.config.superNumbers) root.applyNumberBindings()
+        if (root.config.blur) root.applyBlur()
       } else if (event.name === "urgent") {
         root.urgentSerial++
       } else if (event.name === "activewindowv2") {
-        root.onWindowFocused(String(event.data))
+        root.minimizer.onWindowFocused(String(event.data))
       } else if (event.name === "minimized") {
         var parts = String(event.data).split(",")
         if (parts[1] !== "1") return
         for (var i = 0; i < root.toplevels.length; i++)
-          if (root.toplevels[i].address === parts[0]) root.minimizeWindow(root.toplevels[i])
+          if (root.toplevels[i].address === parts[0]) root.minimizer.minimize(root.toplevels[i])
       }
     }
-  }
-
-  Process {
-    id: x11Watch
-    running: true
-    command: ["python3", Qt.resolvedUrl("x11-minimize-watch.py").toString().replace("file://", "")]
-    stdout: SplitParser {
-      onRead: function(line) {
-        var request = null
-        try { request = JSON.parse(line) } catch (error) { return }
-        root.minimizeWindow(root.x11Toplevel(Number(request.pid) || 0, String(request.title || "")))
-      }
-    }
-    onExited: x11WatchRestart.restart()
-  }
-
-  Timer {
-    id: x11WatchRestart
-    interval: 5000
-    onTriggered: x11Watch.running = true
   }
 
   Process {
@@ -553,7 +519,10 @@ Item {
   Timer { id: refreshSoon; interval: 60; onTriggered: clientsQuery.running = true }
   Timer { id: refreshLate; interval: 700; onTriggered: clientsQuery.running = true }
 
-  Component.onCompleted: clientsQuery.running = true
+  Component.onCompleted: {
+    clientsQuery.running = true
+    if (config.blur) applyBlur()
+  }
 
   Variants {
     id: docks

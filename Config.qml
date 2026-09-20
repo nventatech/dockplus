@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import "Logic.js" as Logic
 
 Item {
   id: root
@@ -26,6 +27,8 @@ Item {
   readonly property string indicatorStyle: indicatorStyles.indexOf(adapter.indicatorStyle) !== -1 ? adapter.indicatorStyle : "default"
   readonly property int backgroundOpacity: Math.max(minOpacity, Math.min(100, adapter.backgroundOpacity))
   readonly property bool panelMode: adapter.panelMode
+  readonly property bool blur: adapter.blur
+  readonly property bool hideWhileRecording: adapter.hideWhileRecording
   readonly property bool animations: adapter.animations
   readonly property int animationSpeed: Math.max(50, Math.min(200, adapter.animationSpeed))
   readonly property int hoverZoom: Math.max(0, Math.min(30, adapter.hoverZoom))
@@ -42,6 +45,7 @@ Item {
   readonly property var clickActions: ["smart", "cycle", "launch"]
   readonly property string clickAction: clickActions.indexOf(adapter.clickAction) !== -1 ? adapter.clickAction : "smart"
 
+  readonly property string folderPrefix: "@folder:"
   readonly property var specials: ["@drives", "@trash", "@apps"]
   readonly property var order: {
     var out = []
@@ -54,6 +58,7 @@ Item {
     return out
   }
   readonly property var pinned: order.filter(function(token) { return !root.isSpecial(token) })
+  readonly property var folders: order.filter(function(token) { return root.isFolder(token) })
 
   function setAutohide(value) { adapter.autohide = value === true }
   function setIconSize(value) { adapter.iconSize = Math.max(minIconSize, Math.min(maxIconSize, Math.round(value))) }
@@ -67,6 +72,8 @@ Item {
   function setIndicatorStyle(value) { if (indicatorStyles.indexOf(value) !== -1) adapter.indicatorStyle = value }
   function setBackgroundOpacity(value) { adapter.backgroundOpacity = Math.max(minOpacity, Math.min(100, Math.round(value))) }
   function setPanelMode(value) { adapter.panelMode = value === true }
+  function setBlur(value) { adapter.blur = value === true }
+  function setHideWhileRecording(value) { adapter.hideWhileRecording = value === true }
   function setPreviewOnHover(value) { adapter.previewOnHover = value === true }
   function setSuperNumbers(value) { adapter.superNumbers = value === true }
   function setAnimations(value) { adapter.animations = value === true }
@@ -82,6 +89,23 @@ Item {
   function setClickAction(value) { if (clickActions.indexOf(value) !== -1) adapter.clickAction = value }
 
   function isSpecial(token) { return String(token).charAt(0) === "@" }
+
+  function isFolder(token) { return String(token).indexOf(folderPrefix) === 0 }
+
+  function folderPath(token) { return String(token).substring(folderPrefix.length) }
+
+  function folderToken(path) { return Logic.folderToken(folderPrefix, path) }
+
+  function addFolder(path) {
+    var token = folderToken(path)
+    if (!path || order.indexOf(token) !== -1) return
+    setOrder(order.concat([token]))
+  }
+
+  function removeToken(token) {
+    if (specials.indexOf(token) !== -1) return
+    setOrder(order.filter(function(other) { return other !== token }))
+  }
 
   function isPinned(key) { return pinned.indexOf(key) !== -1 }
 
@@ -102,7 +126,7 @@ Item {
   }
 
   function moveEntry(token, toIndex) {
-    if (!token || (isSpecial(token) && specials.indexOf(token) === -1)) return
+    if (!token || (isSpecial(token) && specials.indexOf(token) === -1 && !isFolder(token))) return
     var next = order.filter(function(other) { return other !== token })
     var target = Math.max(0, Math.min(next.length, Math.round(toIndex)))
     next.splice(target, 0, token)
@@ -145,6 +169,8 @@ Item {
       property string indicatorStyle: "default"
       property int backgroundOpacity: 100
       property bool panelMode: false
+      property bool blur: false
+      property bool hideWhileRecording: true
       property bool isolateWorkspaces: false
       property list<string> pinned: []
     }

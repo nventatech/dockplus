@@ -16,8 +16,9 @@ A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so Do
 - Live window previews on click or on hover, and a picker for every minimized window.
 - Right click menu with the app's own actions (Steam Library, a Brave incognito window).
 - Drag any icon to reorder it. Drop files on an app to open them, on a drive to copy them, or on the trash to delete them.
-- Trash, removable drives and an applications button, each one optional.
-- Bottom, left or right edge, autohide, panel mode, and it never covers a fullscreen game.
+- Trash, removable drives, pinned folders and an applications button, each one optional.
+- Unread counts and progress bars on the icons, from the apps that publish them.
+- Bottom, left or right edge, autohide, panel mode, optional blur, and it stays out of fullscreen games and screen recordings.
 - Scroll to cycle windows, a bounce while an app starts and a wiggle when a window asks for attention.
 - Settings window with tabs for appearance, position, behavior, animations and items.
 
@@ -37,7 +38,7 @@ A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so Do
 
 ## Requirements
 
-Omarchy 4 (Quattro). Everything else ships with Omarchy: `python3` for the X11 minimize helper, `udisks2` and `gvfs` for drives and trash, `gtk-launch` and `uwsm` to start apps.
+Omarchy 4 (Quattro). Everything else ships with Omarchy: `python3` and `python-gobject` for the X11 minimize helper and the icon badges, `udisks2` and `gvfs` for drives and trash, `gtk-launch` and `uwsm` to start apps.
 
 ## Install
 
@@ -59,18 +60,26 @@ o.bind("SUPER + ALT + M", "Pick minimized window to restore", "omarchy-shell doc
 
 The setting **Super + 1-9 opens dock items** binds `SUPER + 1..9` to the dock instead of the Omarchy workspace switch while it is on. It changes the running binds only, never your config files.
 
-Other commands: `omarchy-shell dockplus settings`, `activate <N>`, `pin <appId>`, `unpin <appId>`, `move <appId|@drives|@trash|@apps> <index>` and `position <bottom|left|right>`.
+Other commands: `omarchy-shell dockplus settings`, `activate <N>`, `pin <appId>`, `unpin <appId>`, `folder <path>`, `unfolder <path>`, `move <appId|@drives|@trash|@apps|@folder:path> <index>` and `position <bottom|left|right>`.
 
 ## Configuration
 
 Stored in `~/.config/dockplus/config.json` and edited by the settings window:
 
-- Appearance: `iconSize`, `backgroundOpacity`, `indicatorStyle`, `panelMode`.
+- Appearance: `iconSize`, `backgroundOpacity`, `indicatorStyle`, `panelMode`, `blur`.
 - Position: `position`, `monitor`, `autohide`.
-- Behavior: `clickAction` (`smart`, `cycle`, `launch`), `previewOnHover`, `superNumbers`.
+- Behavior: `clickAction` (`smart`, `cycle`, `launch`), `previewOnHover`, `superNumbers`, `hideWhileRecording`.
 - Animations: `animations`, `animationSpeed`, `revealStyle` (`slide`, `fade`, `none`), `hoverZoom`, `launchBounce`, `urgentWiggle`, `showDelay`, `hideDelay`.
 - Items: `showPinned`, `showAppsButton`, `showTrash`, `showDrives`, `isolateMonitors`, `isolateWorkspaces`.
-- `pinned`: dock order, desktop entry ids plus `@drives`, `@trash` and `@apps`.
+- `pinned`: dock order, desktop entry ids plus `@drives`, `@trash`, `@apps` and `@folder:<path>`.
+
+## Tests
+
+```bash
+./tests/run.sh
+```
+
+Runs the pure logic and the drive parsing in a throwaway Quickshell config. Exits non zero on the first failing check.
 
 ## Limitations
 

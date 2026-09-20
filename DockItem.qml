@@ -15,6 +15,7 @@ DockSlot {
   readonly property bool allMinimized: windows.length > 0 && openWindows.length === 0
   readonly property bool launching: dock.isLaunching(appKey)
   readonly property bool urgent: dock.isUrgent(appKey)
+  readonly property var badge: dock.badgeFor(appKey)
   property real bounce: 0
   property real wiggle: 0
   readonly property string appId: windows.length > 0 ? dock.appIdOf(windows[0]) : appKey
@@ -40,10 +41,10 @@ DockSlot {
     if (actions.length > 0) entries.push({ separator: true })
     if (open.length > 0) entries.push({ label: dock.tr("minimize"), run: function() {
       var target = open.find(function(window) { return window.activated }) || open[0]
-      item.dock.minimizeWindow(target)
+      item.dock.minimizer.minimize(target)
     } })
     if (minimized.length > 0) entries.push({ label: dock.tr("restore"), run: function() {
-      item.dock.restoreWindow(minimized[minimized.length - 1])
+      item.dock.minimizer.restore(minimized[minimized.length - 1])
     } })
     if (dock.config.isPinned(appKey))
       entries.push({ label: dock.tr("unpin"), run: function() { item.dock.config.unpin(item.appKey) } })
@@ -127,6 +128,46 @@ DockSlot {
     NumberAnimation { target: item; property: "wiggle"; to: 8; duration: item.host.duration(100) }
     NumberAnimation { target: item; property: "wiggle"; to: 0; duration: item.host.duration(80) }
     PauseAnimation { duration: 1400 }
+  }
+
+  Rectangle {
+    visible: item.badge !== null && item.badge.count > 0
+    z: 6
+    x: item.iconX + item.host.iconSize - width + 4
+    y: item.iconY - 4
+    width: Math.max(height, badgeLabel.implicitWidth + 8)
+    height: badgeLabel.implicitHeight + 4
+    radius: height / 2
+    color: Color.accent
+
+    Text {
+      id: badgeLabel
+      textFormat: Text.PlainText
+      anchors.centerIn: parent
+      text: !item.badge ? "" : item.badge.count > 99 ? "99+" : String(item.badge.count)
+      color: Color.bar.background
+      font.family: Style.fontFamily
+      font.pixelSize: Style.fontPx(0.8)
+      font.bold: true
+    }
+  }
+
+  Rectangle {
+    visible: item.badge !== null && item.badge.progress >= 0
+    z: 6
+    x: item.iconX
+    y: item.iconY + item.host.iconSize - 5
+    width: item.host.iconSize
+    height: 4
+    radius: 2
+    color: Util.alpha(Color.bar.text, 0.25)
+
+    Rectangle {
+      width: Math.round(parent.width * (item.badge ? item.badge.progress : 0))
+      height: parent.height
+      radius: parent.radius
+      color: Color.accent
+    }
   }
 
   Grid {
