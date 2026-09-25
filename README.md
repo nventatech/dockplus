@@ -1,9 +1,9 @@
 # DockPlus
 
-[![Omarchy](https://img.shields.io/badge/Omarchy-Quattro-1f2335)](https://omarchy.org/)
-[![Version](https://img.shields.io/github/v/release/nventatech/dockplus?label=version&color=54a3d8)](https://github.com/nventatech/dockplus/releases)
-[![Quickshell](https://img.shields.io/badge/Quickshell-plugin-54a3d8)](https://quickshell.org/)
-[![License](https://img.shields.io/badge/license-GPL--3.0-green)](LICENSE)
+[![Omarchy](https://img.shields.io/badge/Omarchy-Quattro-1f2335?style=for-the-badge)](https://omarchy.org/)
+[![Version](https://img.shields.io/github/v/release/nventatech/dockplus?label=version&color=54a3d8&style=for-the-badge)](https://github.com/nventatech/dockplus/releases)
+[![Quickshell](https://img.shields.io/badge/Quickshell-plugin-54a3d8?style=for-the-badge)](https://quickshell.org/)
+[![License](https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge)](LICENSE)
 
 A Dash to Dock style dock for the Omarchy shell. Hyprland has no minimize, so DockPlus adds one: minimized windows stay on their app icon and come back with a click.
 
